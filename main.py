@@ -6,32 +6,12 @@ import argparse
 from typing import List, Tuple
 from bs4 import BeautifulSoup
 
-# generate database
-# get list of spell:* files
-# iterate spell:* html files
-# parse each file as html using beautiful soup
-# create dictionaries of data from each
-#
-# div.page-content >
-# Text source: p{r"Source: (.+)"} # text it comes from
-# School, level/cantrip, ritual, etc.:
-# two possibilities for school:
-# # p>em{(\w)\w{2}-level (\w+)(?:\s*\((ritual)\))?}
-# # # first group should be integer (what about cantrips?)
-# # # second group is school of magic (all lower case; function to proper case)
-# # # actually, there needs to be a special handler if there are third groups
-# # # (because there can be more than one grouping)
-# # # though it only seems to be two spells
-# <p><em>5th-level divination (ritual) (technomagic)</em></p>
-# <p><em>2nd-level conjuration (ritual) (dunamancy)</em></p>
-#
-# # p>em{(\w+)\s cantrip}
-# # # how should cantrips be represented in the database? level -1? 0?
-# # # -1 prevents accidental assumption that it's a typical spell
-# # # but also leaves room for ambiguity about 0 indexed spells
-# # # I think 0 is probably ideal. That seems to be how dnd5e at wikidot does it.
+# DEBUG = {"result", "stripped tags"}
+DEBUG = {"stripped tags", "short"}
 
-# The next few fields are lumped into a p tag:
+# generate database
+# create dictionaries of data from each
+
 # <p><strong>Casting Time:</strong> 1 action<br />
 # <strong>Range:</strong> 150 feet<br />
 # <strong>Components:</strong> V, S, M (a bit of sponge)<br />
@@ -64,6 +44,8 @@ def main():
             soup = open_html_file(file_path)
             spell_data = parse_spell_file(soup)
             spells.append(spell_data)
+            if "short" in DEBUG and len(spells) >= 2:
+                sys.exit()
         except KeyboardInterrupt:
             print("\nExiting from Ctrl-C...")
             sys.exit()
@@ -105,26 +87,20 @@ schools = {
 REGEX_SCHOOLS = "|".join(schools.keys())
 REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
 REGEX_ORDINAL = r"(?:st|nd|rd|th)"
-print(REGEX_SCHOOLS)
 
 regex_dict = {
     "source": r"^Source: ([\w\W]+)$",
     "level_school": rf"(\d+){REGEX_ORDINAL}-level ([\w]+){REGEX_EXTRA}{REGEX_EXTRA}",
     "school_cantrip": rf"^({REGEX_SCHOOLS})\s+(cantrip){REGEX_EXTRA}{REGEX_EXTRA}",
-    "ritual_or_subschool": r"\s\(([\S]+)\)",  # might be more than one, so please iterate
-    "casting_time": r"Casting Time: ([\w\s]+)",
-    "range": r"Range: ([\w\W]+)<br ?/>",
-    "components": r"Components: ",
-    "duration_concentration": r"Duration: (Concentration), ([\w\s]+)",
-    "duration": r"Duration: ([\w\s]+)",
+    "casting_time": r"^Casting Time: ([\w\s]+)",
+    "range": r"^Range: ([\w\W]+)<br ?/>",
+    "components": r"^Components: ",
+    "duration": r"^Duration: (?:(Concentration), )([\w\s]+)",
     "spell_lists": "",
     # might be multiple descriptions, test iterations (make sure they don't match spell list first)
     "descriptions": r"<p>([\w\W]+)</p>",
 
 }
-
-
-DEBUG = {"result"}
 
 
 def get_source(html) -> str:
@@ -191,33 +167,39 @@ def strip_tags(html) -> str:
     p_close = r"</p>"
     p_open = r"<p>"
     combined = rf"{br_tag}|{p_close}|{p_open}"
-    html = re.sub(combined, "", html, re.IGNORECASE)
-    # print(f"{html=}")
+    html = re.sub(combined, "", html, flags=re.IGNORECASE | re.MULTILINE)
+    if "stripped tags" in DEBUG:
+        print(html)
     return html
 
 
 # def get_
+
+def get_title(soup) -> str:
+    """ Take soup, get title """
+    regex_title = r"^(.+) - DND 5th Edition"
+    title = soup.find("title").get_text()
+    title = re.search(regex_title, title)
+    if title:
+        title = title.group(1)
+    return title
 
 
 def parse_spell_file(soup: BeautifulSoup) -> dict:
     """ Process an individual spell file """
     if not soup:
         return {}
-    spell_data = {}
 
     # let's trust beautifulsoup to remove these tags cleanly instead of regex.
     unwrap_list = ['em', 'strong', 'a']
     for tag in unwrap_list:
         for element in soup.select(tag):
             element.unwrap()
-    regex_title = r"^(.+) - DND 5th Edition"
-    title = soup.find("title").get_text()
-    title = re.search(regex_title, title)
-    if title:
-        title = title.group(1)
     page_content = soup.find_all('p')
     # print(get_source(page_content))
+    title = get_title(soup)
     spell_dict = {"title": title}
+    # page_content.insert(0, f"Title: {title}")
     for x in page_content:
         str_line = strip_tags(str(x))
 
@@ -228,10 +210,11 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         if level_school_etc:
             spell_dict.update(level_school_etc)
 
-    if "result" in DEBUG:
+    if "parse_dict" in DEBUG:
         print(spell_dict)
+    print("")
 
-    return spell_data
+    return spell_dict
 
 
 if __name__ == "__main__":
