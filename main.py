@@ -5,7 +5,7 @@ import re
 import argparse
 from typing import List, Tuple
 from bs4 import BeautifulSoup
-
+from patterns import regex_dict, schools_dict
 # DEBUG = {"result", "stripped tags"}
 DEBUG = {"stripped tags", "short"}
 
@@ -69,40 +69,6 @@ def open_html_file(file_path: str) -> BeautifulSoup:
     return BeautifulSoup(content, 'html.parser')
 
 
-schools = {
-    "abjuration": "Abjuration",
-    "conjuration": "Conjuration",
-    "divination": "Divination",
-    "enchantment": "Enchantment",
-    "evocation": "Evocation",
-    "illusion": "Illusion",
-    "necromancy": "Necromancy",
-    "transmutation": "Transmutation",
-    "dunamancy": "Dunamancy",
-    "dunamancy:chronurgy": "Chronurgy Dunamancy:",
-    "dunamancy:graviturgy": "Graviturgy Dunamancy",
-    "ritual": "Ritual",
-    "technomagic": "Technomagic"
-}
-REGEX_SCHOOLS = "|".join(schools.keys())
-REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
-REGEX_ORDINAL = r"(?:st|nd|rd|th)"
-
-regex_dict = {
-    "source": r"^Source: ([\w\W]+)$",
-    "level_school": rf"(\d+){REGEX_ORDINAL}-level ([\w]+){REGEX_EXTRA}{REGEX_EXTRA}",
-    "school_cantrip": rf"^({REGEX_SCHOOLS})\s+(cantrip){REGEX_EXTRA}{REGEX_EXTRA}",
-    "casting_time": r"^Casting Time: ([\w\s]+)",
-    "range": r"^Range: ([\w\W]+)<br ?/>",
-    "components": r"^Components: ",
-    "duration": r"^Duration: (?:(Concentration), )([\w\s]+)",
-    "spell_lists": "",
-    # might be multiple descriptions, test iterations (make sure they don't match spell list first)
-    "descriptions": r"<p>([\w\W]+)</p>",
-
-}
-
-
 def get_source(html) -> str:
     """ Parse and return source from HTML """
     result = re.search(regex_dict["source"], html)
@@ -123,9 +89,9 @@ def normalize_level_school_result(level_school_result: list) -> list:
     if level_school_result[1] == 'cantrip':
         level = 0
         school = level_school_result[0]
-    elif level_school_result[1] in schools:
+    elif level_school_result[1] in schools_dict:
         level = int(level_school_result[0])
-        school = schools[level_school_result[1]]  # fix case for school
+        school = schools_dict[level_school_result[1]]  # fix case for school
 
     ritual = False
     subschool = None
@@ -133,8 +99,8 @@ def normalize_level_school_result(level_school_result: list) -> list:
         current_extra = level_school_result[x]
         if current_extra == "ritual":
             ritual = True
-        elif current_extra in schools:
-            subschool = schools[level_school_result[x]]
+        elif current_extra in schools_dict:
+            subschool = schools_dict[level_school_result[x]]
 
     if level == -1:
         return None
