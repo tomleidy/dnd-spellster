@@ -6,11 +6,13 @@ import argparse
 from typing import List, Tuple
 from bs4 import BeautifulSoup
 from patterns import regex_dict, schools_dict
+from patterns import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
+from patterns import is_range
 
 # pylint: disable=W0612
-# choices {"short", "range", "parse_dict", "casting_time, "level_etc", "stripped_tags"}
-DEBUG = {"stripped_tags"}
-
+# choices {"short", "range", "parsed_dict", "casting_time, "level_etc", "stripped_tags"}
+DEBUG = {"parsed_dict", "title"}
+RE_FLAGS = re.IGNORECASE | re.MULTILINE
 
 # generate database
 # create dictionaries of data from each
@@ -28,12 +30,16 @@ DEBUG = {"stripped_tags"}
 
 parser = argparse.ArgumentParser(description="Parse D&D 5e spell files.")
 parser.add_argument('directory', type=str, help='Directory containing spell HTML files.')
+parser.add_argument('-s', '--short', action="store_true", help="Run abridged")
 
 
 def main():
     """ Main operational part of script """
     args = parser.parse_args()
     directory = args.directory
+
+    if args.short:
+        DEBUG.add("short")
 
     spell_files = get_list_of_files(directory)
     spells = []
@@ -48,10 +54,6 @@ def main():
             print("\nExiting from Ctrl-C...")
             sys.exit()
     count_datapoints(spells)
-#        return
-
-    # for spell in spells:
-    #     print(spell)
 
 
 def get_list_of_files(directory) -> List[str]:
@@ -68,70 +70,60 @@ def open_html_file(file_path: str) -> BeautifulSoup:
     return BeautifulSoup(content, 'html.parser')
 
 
-def parse_action(group) -> dict:
-    regex_combat_time = r"(\d+) ([\w\s]+)"
-
-    return
-
-
-def parse_casting_time_and_units(casting_time_list: List[str]) -> dict:
-    """ Parse out _just_ casting times and units"""
-    casting_time_dict = dict(casting_time_dict_base)
-    regex_parsing_casting_time = r"(?:(\d+) ([\s\S]+)|(\d+) (hours?|minutes?))"
-    for time_and_units in casting_time_list:
-        re_result = re.search(regex_parsing_casting_time, time_and_units, re.IGNORECASE | re.MULTILINE)
-        num_groups = re.compile(regex_parsing_casting_time).groups
-        result = [re_result.group(x) for x in range(1, num_groups)]
-        tmp_value = None
-        for group in result:
-            if not group:
-                continue
-            if not tmp_value and group.isnumeric():
-                tmp_value = int(group)
-                continue
-            group = group.lower()
-            if tmp_value and "action" in group:
-                if casting_time_dict["casting_time_combat_unit"] is not None:
-                    raise RuntimeError("Data has two different action based casting times")
-                casting_time_dict["casting_time_combat"] = int(tmp_value)
-                casting_time_dict["casting_time_combat_unit"] = group
-            elif re.search(r"(hours?|minutes?)", group, flags=re.IGNORECASE | re.MULTILINE):
-                if casting_time_dict["casting_time_unit"] is not None:
-                    raise RuntimeError("Data has two different (non-combat) casting times")
-                casting_time_dict["casting_time"] = int(tmp_value)
-                casting_time_dict["casting_time_unit"] = group
-            tmp_value = None
-    return casting_time_dict
+def load_temp_file():
+    filename = "casting_times.txt"
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as file:
+            return file.readlines()
 
 
-def parse_casting_time_and_conditions(casting_time_string: str) -> dict:
-    """ Parse sections of casting time out into dictionary """
-    casting_time_dict = {}
-    if ", " in casting_time_string:
-        casting_time_list = casting_time_string.split(", ")
-        casting_time_dict["casting_conditions"] = ", ".join(casting_time_list[1:])
-        casting_time_string = casting_time_list[0].strip()
-    if " or " in casting_time_string:
-        casting_time_list = casting_time_string.split(" or ")
-    else:
-        casting_time_list = [casting_time_string]
-    casting_time_dict.update(parse_casting_time_and_units(casting_time_list))
-    return casting_time_dict
+def run_casting_time_txt():
+    lines = load_temp_file()
+    for line in lines:
+        print(get_casting_time(line))
+
+
+casting_time_dict_base_list = ['casting_time_noncombat', 'casting_time_noncombat_unit', 'casting_time_combat',
+                               'casting_time_combat_unit', 'casting_time_reaction_condition']
+casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
+
+
+def get_noncombat_dict(non_combat):
+    return {"casting_time_noncombat": int(non_combat.group(1)),
+            "casting_time_noncombat_unit": non_combat.group(2).lower()
+            }
+
+
+def get_combat_dict(combat):
+    return {"casting_time_combat": int(combat.group(1)),
+            "casting_time_combat_unit": combat.group(2).lower()
+            }
 
 
 def get_casting_time(html) -> str:
     """ Return casting time from HTML """
-    result = re.search(regex_dict["casting_time"], html, flags=re.IGNORECASE | re.MULTILINE)
-    casting_time_dict = {}
+    result = re.findall(regex_dict["casting_times_only"], html, RE_FLAGS)
     if not result:
         return None
-    if debug_this_spell:
-        print("get_casting_time html:", html)
-        # print("get_casting_time re.search result:", result)
-    result = parse_casting_time_and_conditions(result.group(1))
-    casting_time_dict.update(result)
-    if "casting_time" in DEBUG and casting_time_dict:
-        print("DEBUG get_casting_time:", casting_time_dict)
+    casting_time_dict = dict(casting_time_dict_base)
+    for group in result:
+        if not group:
+            continue
+        regex_combat = regex_dict["casting_time_combat"]
+        regex_noncombat = regex_dict["casting_time_noncombat"]
+        combat = re.search(regex_combat, group, RE_FLAGS)
+        non_combat = re.search(regex_noncombat, group, RE_FLAGS)
+        if combat:
+            if casting_time_dict["casting_time_combat"] is not None:
+                raise RuntimeError("Data has two combat casting times")
+            casting_time_dict.update(get_combat_dict(combat))
+        elif non_combat:
+            if casting_time_dict["casting_time_noncombat"] is not None:
+                raise RuntimeError("Data has two non-combat casting times")
+            casting_time_dict.update(get_noncombat_dict(non_combat))
+    condition = re.findall(regex_dict["casting_time_reaction_conditions"], html, RE_FLAGS)
+    if condition:
+        casting_time_dict.update({"casting_time_reaction_condition": condition[0]})
     return casting_time_dict
 
 
@@ -140,10 +132,8 @@ def get_source(html) -> str:
     result = re.search(regex_dict["source"], html)
     if result:
         result = result.group(1)
-        if "source" in DEBUG:
-            print(result)
         return {"source": result}
-    return None
+    return {}
 
 
 def normalize_level_school_result(level_school_result: list) -> list:
@@ -188,22 +178,16 @@ def get_level_and_school_etc(html: str) -> Tuple[str]:
             for x in range(1, 5):
                 result_list.append(result.group(x))
     result_list = normalize_level_school_result(result_list)
-    if "level_etc" in DEBUG and result_list:
-        print(result_list)
     return result_list
 
 
 def strip_tags(html) -> str:
     """ Remove <p> and </p> tags from HTML"""
-    global DEBUG
-    br_tag = r"<br\s*/\s*>"
     p_close = r"</p>"
     p_open = r"<p>"
-    combined = rf"{br_tag}|{p_close}|{p_open}"
-    html = re.sub(combined, "", html, flags=re.IGNORECASE | re.MULTILINE)
-    if "stripped_tags" in DEBUG:
-        print(html)
-    return html
+    html = re.sub(p_close, "\n", html, RE_FLAGS)
+    html = re.sub(p_open, "", html, RE_FLAGS)
+    return html.strip()
 
 
 def get_title(soup) -> str:
@@ -228,7 +212,7 @@ range_dict_base = {"range_distance": None, "range_units": None,
 
 def get_range(html: str) -> dict:
     """ Get range from provided string """
-    section = re.search(regex_dict["range"], html, flags=re.IGNORECASE | re.MULTILINE)
+    section = re.search(regex_dict["range"], html, flags=RE_FLAGS)
     if not section:
         return None
     section = section.group(1)
@@ -256,24 +240,7 @@ def get_range(html: str) -> dict:
     range_dict.update({"range_distance": distance, "range_units": unit,
                        "range_focus": focus, "range_string": shape
                        })
-    if "range" in DEBUG:
-        print(range_dict)
     return range_dict
-
-
-broken_set = {}
-unbroken_set = {
-    "Nathair's Mischief",
-    "Rime's Binding Ice",
-    "Mass Polymorph",
-    "Summon Draconic Spirit",
-    "Draconic Transformation",
-    "Antagonize"
-}
-
-casting_time_dict_base_list = ['casting_time', 'casting_time_unit', 'casting_time_combat',
-                               'casting_time_combat_unit', 'casting_conditions']
-casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
 
 
 def count_datapoints(spells) -> None:
@@ -296,9 +263,7 @@ def count_datapoints(spells) -> None:
         if spell["subschool"] is not None:
             counts["subschools"] += 1
 
-        for idx, key in enumerate(casting_time_keys):
-            if idx == len(casting_time_keys)-1:
-                print(spell)
+        for _, key in enumerate(casting_time_keys):
             if key in spell and spell[key] is not None:
                 counts["casting_times"] += 1
                 break
@@ -310,7 +275,16 @@ def count_datapoints(spells) -> None:
     print(counts)
 
 
-debug_this_spell = False
+DEBUG_THIS_SPELL = False
+broken_set = {}
+unbroken_set = {
+    "Nathair's Mischief",
+    "Rime's Binding Ice",
+    "Mass Polymorph",
+    "Summon Draconic Spirit",
+    "Draconic Transformation",
+    "Antagonize"
+}
 
 
 def parse_spell_file(soup: BeautifulSoup) -> dict:
@@ -319,37 +293,55 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         return {}
 
     # let's trust beautifulsoup to remove these tags cleanly instead of regex.
-    unwrap_list = ['em', 'strong', 'a', 'br']
-    for tag in unwrap_list:
+    for tag in ['em', 'strong', 'a', 'br']:
         for element in soup.select(tag):
             element.unwrap()
     page_content = soup.find_all('p')
-    global DEBUG
-    global debug_this_spell
-    # print(get_source(page_content))
-    title = get_title(soup)
-    if title in broken_set:
-        debug_this_spell = True
-    else:
-        debug_this_spell = False
-    spell_dict = {"title": title}
-    page_content.insert(0, f"Title: {title}")
+
+    spell_dict = {"title": get_title(soup)}
+    print(f"\n+++ Adding spell {spell_dict["title"]}")
+
     for x in page_content:
-
         str_line = strip_tags(str(x))
-        source = get_source(str_line)
-        level_school_etc = get_level_and_school_etc(str_line)
-        casting_time = get_casting_time(str_line)
-        spell_range = get_range(str_line)
+        if is_source(str_line):
+            source = get_source(str_line)
+            spell_dict.update(source)
+            print(f"=== Updated source for {spell_dict["title"]}: {source}")
+        elif is_level_school_etc(str_line):
+            level_etc = get_level_and_school_etc(str_line)
+            spell_dict.update(level_etc)
+            print(f"=== Updated level, school, etc., for {spell_dict["title"]}: {level_etc}")
+        elif does_line_need_splitting(str_line):
+            print(f"=~= Line needs splitting: {str_line.split("\n")}")
+            for line in str_line.split("\n"):
+                if is_casting_time(line):
+                    casting_time = get_casting_time(line)
+                    spell_dict.update(casting_time)
+                    print(f"=== Updated casting time for {spell_dict["title"]}: {casting_time}")
+                elif is_range(line):
+                    range_info = get_range(line)
+                    spell_dict.update(range_info)
+                    print(f"=== Updated range for {spell_dict["title"]}: {range_info}")
+                else:
+                    print(f"--- Line needs parsing? {line}")
+        else:
+            print(f"xxx broken with line: {str_line}")
 
-        for result in [source, level_school_etc, casting_time, spell_range]:
-            if result:
-                spell_dict.update(result)
-    if "parse_dict" in DEBUG or debug_this_spell:
-        print(spell_dict)
-    # print("")
     return spell_dict
 
 
+def process_casting_time_p_block(html) -> dict:
+    """ For the section containing:
+    casting time, range, components, duration"""
+    if not html:
+        return {}
+    results = {}
+    for line in html.split("\n"):
+        results.update(get_casting_time(line))
+        results.update(get_range(line))
+    return results
+
+
 if __name__ == "__main__":
+    # run_casting_time_txt()
     main()
