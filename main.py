@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from patterns import regex_dict, schools_dict
 
 # pylint: disable=W0612
-# choices {"short", "range", "parse_dict", "casting_time, "level_etc"}
+# choices {"short", "range", "parse_dict", "casting_time, "level_etc", "stripped_tags"}
 DEBUG = {"stripped_tags"}
 
 
@@ -66,6 +66,12 @@ def open_html_file(file_path: str) -> BeautifulSoup:
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
     return BeautifulSoup(content, 'html.parser')
+
+
+def parse_action(group) -> dict:
+    regex_combat_time = r"(\d+) ([\w\s]+)"
+
+    return
 
 
 def parse_casting_time_and_units(casting_time_list: List[str]) -> dict:
@@ -189,6 +195,7 @@ def get_level_and_school_etc(html: str) -> Tuple[str]:
 
 def strip_tags(html) -> str:
     """ Remove <p> and </p> tags from HTML"""
+    global DEBUG
     br_tag = r"<br\s*/\s*>"
     p_close = r"</p>"
     p_open = r"<p>"
@@ -254,7 +261,8 @@ def get_range(html: str) -> dict:
     return range_dict
 
 
-broken_set = {
+broken_set = {}
+unbroken_set = {
     "Nathair's Mischief",
     "Rime's Binding Ice",
     "Mass Polymorph",
@@ -311,7 +319,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         return {}
 
     # let's trust beautifulsoup to remove these tags cleanly instead of regex.
-    unwrap_list = ['em', 'strong', 'a']
+    unwrap_list = ['em', 'strong', 'a', 'br']
     for tag in unwrap_list:
         for element in soup.select(tag):
             element.unwrap()
@@ -322,9 +330,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
     title = get_title(soup)
     if title in broken_set:
         debug_this_spell = True
-        DEBUG = {"casting_times"}
     else:
-        DEBUG = {}
         debug_this_spell = False
     spell_dict = {"title": title}
     page_content.insert(0, f"Title: {title}")
@@ -341,7 +347,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                 spell_dict.update(result)
     if "parse_dict" in DEBUG or debug_this_spell:
         print(spell_dict)
-    print("")
+    # print("")
     return spell_dict
 
 
