@@ -9,7 +9,7 @@ from helpers import santize_string
 from helpers import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
 from helpers import is_range, is_components
 from parsers import RE_FLAGS
-from parsers import casting_time_dict_base, range_dict_base
+from parsers import casting_time_dict_base, range_dict_base, components_dict_base
 from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time, get_range
 from parsers import get_components
 
@@ -73,6 +73,7 @@ def count_datapoints(spells) -> None:
     counts = {key: 0 for key in keys}
     casting_time_keys = casting_time_dict_base.keys()
     range_keys = range_dict_base.keys()
+    component_keys = components_dict_base.keys()
     for spell in spells:
 
         if spell["title"]:
@@ -93,6 +94,10 @@ def count_datapoints(spells) -> None:
         for key in range_keys:
             if key in spell:
                 counts["ranges"] += 1
+                break
+        for key in component_keys:
+            if key in spell and spell[key] is not None and spell[key] is not False:
+                counts["components"] += 1
                 break
 
     print(counts)
@@ -116,7 +121,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         return {}
 
     # let's trust beautifulsoup to remove these tags cleanly instead of regex.
-    for tag in ['em', 'strong', 'a', 'br']:
+    for tag in ['em', 'strong', 'a', 'br', 'ul', 'li', 'ol']:
         for element in soup.select(tag):
             element.unwrap()
     page_content = soup.find_all('p')
@@ -148,12 +153,12 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                     print(f"=== Updated range for {spell_dict["title"]}: {range_info}")
                 elif is_components(line):
                     components = get_components(line)
+                    spell_dict.update(components)
                     print(f"=== Updated components for {spell_dict["title"]}: {components}")
                 else:
                     print(f"--- Line needs parsing? {line}")
         else:
-            print(f"-x- broken with line: {str_line}")
-
+            print(f"\n-x- broken with line: {str_line}")
     return spell_dict
 
 

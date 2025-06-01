@@ -166,7 +166,6 @@ components_dict_base = {
 def get_components(html: str) -> dict:
     """ Get components from string """
     components = dict(components_dict_base)
-    print(html)
     result = re.search(regex_dict["components"], html, flags=RE_FLAGS)
     for group in result.groups():
         if not group:

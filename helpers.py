@@ -47,3 +47,8 @@ def is_range(line: str) -> bool:
 def is_components(line: str) -> bool:
     """ Does this line contain component information? """
     return re.match(regex_dict["components"], line, flags=RE_FLAGS)
+
+
+def is_duration(line: str) -> bool:
+    """ Does this line contain a duration? """
+    return re.match(regex_dict["components"], line, flags=RE_FLAGS)
