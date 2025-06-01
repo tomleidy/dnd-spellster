@@ -1,0 +1,164 @@
+Spell Lists: Artificer, Bard (Optional), Sorcerer (Optional), Warlock (Optional), Wizard (Optional)
+Spell Lists: Bard, Cleric
+Spell Lists: Bard, Cleric, Wizard
+Spell Lists: Cleric
+Spell Lists: Cleric, Wizard
+Spell Lists. Artificer
+Spell Lists. Artificer, Bard (Optional), Cleric, Paladin, Ranger (Optional)
+Spell Lists. Artificer, Bard (Optional), Druid (Optional), Sorcerer, Wizard
+Spell Lists. Artificer, Bard, Cleric, Druid, Paladin, Ranger
+Spell Lists. Artificer, Bard, Cleric, Druid, Paladin, Ranger, Sorcerer, Wizard
+Spell Lists. Artificer, Bard, Cleric, Druid, Paladin, Sorcerer, Warlock, Wizard
+Spell Lists. Artificer, Bard, Cleric, Druid, Ranger
+Spell Lists. Artificer, Bard, Cleric, Druid, Ranger (Optional)
+Spell Lists. Artificer, Bard, Cleric, Druid, Ranger (Optional), Sorcerer, Wizard (Optional)
+Spell Lists. Artificer, Bard, Cleric, Druid, Sorcerer, Wizard
+Spell Lists. Artificer, Bard, Cleric, Sorcerer, Wizard
+Spell Lists. Artificer, Bard, Cleric, Wizard
+Spell Lists. Artificer, Bard, Druid
+Spell Lists. Artificer, Bard, Druid, Ranger, Wizard
+Spell Lists. Artificer, Bard, Sorcerer, Warlock, Wizard
+Spell Lists. Artificer, Bard, Sorcerer, Wizard
+Spell Lists. Artificer, Bard, Wizard
+Spell Lists. Artificer, Cleric
+Spell Lists. Artificer, Cleric, Druid
+Spell Lists. Artificer, Cleric, Druid (Optional), Paladin, Ranger (Optional)
+Spell Lists. Artificer, Cleric, Druid (Optional), Wizard
+Spell Lists. Artificer, Cleric, Druid, Paladin
+Spell Lists. Artificer, Cleric, Druid, Paladin, Ranger
+Spell Lists. Artificer, Cleric, Druid, Ranger, Sorcerer
+Spell Lists. Artificer, Cleric, Druid, Ranger, Sorcerer, Wizard
+Spell Lists. Artificer, Cleric, Druid, Wizard
+Spell Lists. Artificer, Cleric, Paladin
+Spell Lists. Artificer, Druid
+Spell Lists. Artificer, Druid (Optional), Paladin, Ranger (Optional)
+Spell Lists. Artificer, Druid, Ranger, Sorcerer, Wizard
+Spell Lists. Artificer, Druid, Ranger, Wizard
+Spell Lists. Artificer, Druid, Sorcerer, Warlock, Wizard
+Spell Lists. Artificer, Druid, Sorcerer, Wizard
+Spell Lists. Artificer, Paladin, Ranger (Optional), Sorcerer (Optional), Wizard
+Spell Lists. Artificer, Ranger, Sorcerer, Wizard
+Spell Lists. Artificer, Ranger, Wizard
+Spell Lists. Artificer, Sorcerer (Optional), Warlock (Optional), Wizard (Optional)
+Spell Lists. Artificer, Sorcerer (Optional), Wizard
+Spell Lists. Artificer, Sorcerer (Optional), Wizard (Optional)
+Spell Lists. Artificer, Sorcerer, Warlock, Wizard
+Spell Lists. Artificer, Sorcerer, Wizard
+Spell Lists. Artificer, Wizard
+Spell Lists. Artificer, Wizard (Optional)
+Spell Lists. Artificer,Wizard
+Spell Lists. Bard
+Spell Lists. Bard (Optional), Cleric
+Spell Lists. Bard (Optional), Cleric, Druid
+Spell Lists. Bard (Optional), Cleric, Paladin
+Spell Lists. Bard (Optional), Druid, Wizard
+Spell Lists. Bard (Optional), Sorcerer (Optional), Warlock (Optional), Wizard (Optional)
+Spell Lists. Bard (Optional), Sorcerer, Warlock, Wizard
+Spell Lists. Bard (Optional), Sorcerer, Wizard
+Spell Lists. Bard (Optional), Wizard
+Spell Lists. Bard, Cleric
+Spell Lists. Bard, Cleric (Optional)
+Spell Lists. Bard, Cleric, Druid
+Spell Lists. Bard, Cleric, Druid (Optional), Wizard
+Spell Lists. Bard, Cleric, Druid, Paladin, Ranger, Wizard
+Spell Lists. Bard, Cleric, Druid, Paladin, Wizard
+Spell Lists. Bard, Cleric, Druid, Sorcerer, Warlock, Wizard
+Spell Lists. Bard, Cleric, Druid, Warlock (Optional), Wizard
+Spell Lists. Bard, Cleric, Druid, Warlock, Wizard
+Spell Lists. Bard, Cleric, Druid, Wizard
+Spell Lists. Bard, Cleric, Paladin
+Spell Lists. Bard, Cleric, Ranger
+Spell Lists. Bard, Cleric, Sorcerer, Warlock, Wizard
+Spell Lists. Bard, Cleric, Sorcerer, Wizard
+Spell Lists. Bard, Cleric, Warlock, Wizard
+Spell Lists. Bard, Cleric, Wizard
+Spell Lists. Bard, Cleric, Wizard (Optional)
+Spell Lists. Bard, Druid
+Spell Lists. Bard, Druid, Ranger
+Spell Lists. Bard, Druid, Sorcerer, Warlock, Wizard
+Spell Lists. Bard, Druid, Sorcerer, Warlock, Wizard, Artificer
+Spell Lists. Bard, Druid, Sorcerer, Wizard
+Spell Lists. Bard, Druid, Warlock, Wizard
+Spell Lists. Bard, Druid, Wizard
+Spell Lists. Bard, Druid, Wizard, Artificer
+Spell Lists. Bard, Paladin
+Spell Lists. Bard, Ranger, Sorcerer, Wizard
+Spell Lists. Bard, Ranger, Wizard
+Spell Lists. Bard, Sorcerer, Warlock (Optional), Wizard
+Spell Lists. Bard, Sorcerer, Warlock, Wizard
+Spell Lists. Bard, Sorcerer, Wizard
+Spell Lists. Bard, Sorcerer, Wizard, Artificer
+Spell Lists. Bard, Warlock
+Spell Lists. Bard, Warlock (Optional), Wizard
+Spell Lists. Bard, Warlock, Wizard
+Spell Lists. Bard, Wizard
+Spell Lists. Cleric
+Spell Lists. Cleric (Optional), Druid (Optional), Paladin
+Spell Lists. Cleric (Optional), Druid, Sorcerer, Wizard
+Spell Lists. Cleric (Optional), Paladin
+Spell Lists. Cleric (Optional), Paladin (Optional)
+Spell Lists. Cleric (Optional), Paladin (Optional), Warlock (Optional), Wizard (Optional)
+Spell Lists. Cleric, Druid
+Spell Lists. Cleric, Druid (Optional), Paladin, Warlock, Wizard
+Spell Lists. Cleric, Druid (Optional), Wizard (Optional)
+Spell Lists. Cleric, Druid, Paladin, Ranger
+Spell Lists. Cleric, Druid, Paladin, Ranger, Sorcerer
+Spell Lists. Cleric, Druid, Ranger
+Spell Lists. Cleric, Druid, Ranger (Optional)
+Spell Lists. Cleric, Druid, Sorcerer
+Spell Lists. Cleric, Druid, Sorcerer, Warlock, Wizard
+Spell Lists. Cleric, Druid, Wizard
+Spell Lists. Cleric, Paladin
+Spell Lists. Cleric, Paladin (Optional)
+Spell Lists. Cleric, Paladin (Optional), Wizard
+Spell Lists. Cleric, Paladin, Sorcerer, Warlock, Wizard
+Spell Lists. Cleric, Paladin, Warlock, Wizard
+Spell Lists. Cleric, Sorcerer, Warlock (Optional), Wizard
+Spell Lists. Cleric, Sorcerer, Warlock, Wizard
+Spell Lists. Cleric, Warlock, Wizard
+Spell Lists. Cleric, Wizard
+Spell Lists. Druid
+Spell Lists. Druid (Optional), Ranger (Optional)
+Spell Lists. Druid (Optional), Ranger (Optional), Warlock (Optional), Wizard (Optional)
+Spell Lists. Druid (Optional), Ranger (Optional), Wizard (Optional)
+Spell Lists. Druid (Optional), Sorcerer (Optional), Warlock, Wizard
+Spell Lists. Druid (Optional), Sorcerer (Optional), Wizard
+Spell Lists. Druid (Optional), Sorcerer, Wizard
+Spell Lists. Druid, Ranger
+Spell Lists. Druid, Ranger (Optional)
+Spell Lists. Druid, Ranger (Optional), Sorcerer
+Spell Lists. Druid, Ranger (Optional), Sorcerer, Wizard
+Spell Lists. Druid, Ranger, Sorcerer
+Spell Lists. Druid, Ranger, Sorcerer, Wizard
+Spell Lists. Druid, Ranger, Sorcerer, Wizard, Artificer
+Spell Lists. Druid, Sorcerer (Optional)
+Spell Lists. Druid, Sorcerer (Optional), Wizard
+Spell Lists. Druid, Sorcerer, Warlock, Wizard
+Spell Lists. Druid, Sorcerer, Warlock, Wizard, Artificer
+Spell Lists. Druid, Sorcerer, Wizard
+Spell Lists. Druid, Warlock
+Spell Lists. Druid, Warlock, Artificer
+Spell Lists. Druid, Warlock, Wizard, Artificer
+Spell Lists. Druid, Wizard
+Spell Lists. Druid, Wizard, Artificer
+Spell Lists. Paladin
+Spell Lists. Paladin, Ranger (Optional)
+Spell Lists. Paladin, Sorcerer, Warlock, Wizard
+Spell Lists. Ranger
+Spell Lists. Ranger, Wizard
+Spell Lists. Sorcerer
+Spell Lists. Sorcerer (Optional), Warlock (Optional), Wizard (Optional)
+Spell Lists. Sorcerer (Optional), Warlock, Wizard
+Spell Lists. Sorcerer (Optional), Wizard
+Spell Lists. Sorcerer (Optional), Wizard (Optional)
+Spell Lists. Sorcerer, Warlock, Wizard
+Spell Lists. Sorcerer, Wizard
+Spell Lists. Sorcerer, Wizard, Artificer
+Spell Lists. Warlock
+Spell Lists. Warlock (Optional), Wizard
+Spell Lists. Warlock (Optional), Wizard (Optional)
+Spell Lists. Warlock, Wizard
+Spell Lists. Wizard
+Spell Lists. Wizard (Dunamancy)
+Spell Lists. Wizard (Graviturgy)
+Spell Lists. Wizard, Artificer

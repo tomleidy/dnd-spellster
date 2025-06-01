@@ -1,0 +1,33 @@
+Duration: 1 day
+Duration: 1 hour
+Duration: 1 minute
+Duration: 1 round
+Duration: 10 days
+Duration: 10 minutes
+Duration: 24 hours
+Duration: 24 Hours
+Duration: 30 days
+Duration: 6 hours
+Duration: 7 days
+Duration: 8 hours
+Duration: Concentration, up to 1 day
+Duration: Concentration, up to 1 hour
+Duration: Concentration, up to 1 minute
+Duration: Concentration, up to 1 round
+Duration: Concentration, up to 10 minutes
+Duration: Concentration, up to 2 hours
+Duration: Concentration, up to 24 hours
+Duration: Concentration, up to 6 rounds
+Duration: Concentration, up to 8 hours
+Duration: Concentration, Up to 8 hours
+Duration: Instantaneous
+Duration: Instantaneous (see below)
+Duration: Instantaneous or 1 hour
+Duration: Instantanous
+Duration: Special
+Duration: Until dispelled
+Duration: Until dispelled or triggered
+Duration: Up to 1 hour
+Duration: Up to 1 minute
+Duration: Up to 10 minutes
+Duration: Up to 8 hours
