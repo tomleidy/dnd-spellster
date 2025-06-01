@@ -6,16 +6,12 @@ import argparse
 from typing import List, Tuple
 from bs4 import BeautifulSoup
 from patterns import regex_dict, schools_dict
-# DEBUG = {"result", "stripped tags"}
-DEBUG = {"stripped tags", "short"}
+
+# pylint: disable=W0612
+DEBUG = {"casting time"}
 
 # generate database
 # create dictionaries of data from each
-
-# <p><strong>Casting Time:</strong> 1 action<br />
-# <strong>Range:</strong> 150 feet<br />
-# <strong>Components:</strong> V, S, M (a bit of sponge)<br />
-# <strong>Duration:</strong> Instantaneous</p>
 
 # manage character data
 # level, max hit points, (current hp?)
@@ -67,6 +63,58 @@ def open_html_file(file_path: str) -> BeautifulSoup:
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()
     return BeautifulSoup(content, 'html.parser')
+
+
+def get_casting_time_or(result) -> dict:
+    """ Parse out the alternative casting times if there's an or (as of 2025/05/31, only one case, but still)"""
+
+
+def parse_casting_time(casting_time_string: str) -> dict:
+    """ Parse sections of casting time out into dictionary """
+    casting_time_dict = {}
+    if ", " in casting_time_string:
+        casting_time_list = casting_time_string.split(", ")
+        casting_time_dict["casting_conditions"] = ", ".join(casting_time_list[1:])
+        casting_time_string = casting_time_list[0].strip()
+    if " or " in casting_time_string:
+        casting_time_list = casting_time_string.split(" or ")
+    else:
+        casting_time_list = [casting_time_string]
+    regex_parsing_casting_time = r"(?:(\d+) ([\w\s]+)|(\d+) (hours?|minutes?))"
+    for time_and_units in casting_time_list:
+        re_result = re.search(regex_parsing_casting_time, time_and_units)
+        result = [re_result.group(x) for x in range(1, re.compile(regex_parsing_casting_time).groups)]
+        tmp_value = None
+        for group in result:
+            if not tmp_value and group and group.isnumeric():
+                tmp_value = int(group)
+                continue
+            if tmp_value and "action" in group:
+                if "casting_time_combat_unit" in casting_time_dict:
+                    raise RuntimeError("Data has two different action based casting times")
+                casting_time_dict["casting_time_combat"] = int(tmp_value)
+                casting_time_dict["casting_time_combat_unit"] = group.lower()
+            elif re.search(r"(hours?|minutes?)", group):
+                if "casting_time_unit" in casting_time_dict:
+                    raise RuntimeError("Data has two different (non-combat) casting times")
+                casting_time_dict["casting_time"] = int(tmp_value)
+                casting_time_dict["casting_time_unit"] = group.lower()
+            tmp_value = None
+    return casting_time_dict
+
+
+def get_casting_time(html) -> str:
+    """ Return casting time from HTML """
+    result = re.search(regex_dict["casting_time"], html, flags=re.IGNORECASE | re.MULTILINE)
+    casting_time_dict = {}
+    if not result:
+        return None
+    print(result)
+    result = parse_casting_time(result.group(1))
+    casting_time_dict.update(result)
+    if "casting time" in DEBUG and casting_time_dict:
+        print(casting_time_dict)
+    return casting_time_dict
 
 
 def get_source(html) -> str:
@@ -139,8 +187,6 @@ def strip_tags(html) -> str:
     return html
 
 
-# def get_
-
 def get_title(soup) -> str:
     """ Take soup, get title """
     regex_title = r"^(.+) - DND 5th Edition"
@@ -175,6 +221,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         level_school_etc = get_level_and_school_etc(str_line)
         if level_school_etc:
             spell_dict.update(level_school_etc)
+        casting_time = get_casting_time(str_line)
 
     if "parse_dict" in DEBUG:
         print(spell_dict)

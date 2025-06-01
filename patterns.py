@@ -15,7 +15,7 @@ regex_dict = {
     "source": r"^Source: ([\w\W]+)$",
     "level_school": rf"(\d+){REGEX_ORDINAL}-level ([\w]+){REGEX_EXTRA}{REGEX_EXTRA}",
     "school_cantrip": rf"^({REGEX_SCHOOLS})\s+(cantrip){REGEX_EXTRA}{REGEX_EXTRA}",
-    "casting_time": r"^Casting Time: ([\w\s]+)",
+    "casting_time": r"^Casting Time: ([\w\W]+)\nRange",
     "range": r"^Range: ([\w\W]+)<br ?/>",
     "components": r"^Components: ",
     "duration": r"^Duration: (?:(Concentration), )([\w\s]+)",
