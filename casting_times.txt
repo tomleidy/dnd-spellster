@@ -19,7 +19,3 @@ Casting Time: 10 minutes
 Casting Time: 12 hours
 Casting Time: 24 hours
 Casting Time: 8 hours
-
-
-
-r"^Casting Time: (\d+) (action|bonus action|reaction|hours?|minutes?)
