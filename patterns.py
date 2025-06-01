@@ -11,12 +11,14 @@ REGEX_SCHOOLS = "|".join(schools_dict.keys())
 REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
 REGEX_ORDINAL = r"(?:st|nd|rd|th)"
 
+
+strict_range = r"[]"
 regex_dict = {
     "source": r"^Source: ([\w\W]+)$",
     "level_school": rf"(\d+){REGEX_ORDINAL}-level ([\w]+){REGEX_EXTRA}{REGEX_EXTRA}",
     "school_cantrip": rf"^({REGEX_SCHOOLS})\s+(cantrip){REGEX_EXTRA}{REGEX_EXTRA}",
     "casting_time": r"^Casting Time: ([\w\W]+)\nRange",
-    "range": r"^Range: ([\w\W]+)<br ?/>",
+    "range": r"Range: ([\w\s(),-]+)\nComponents",
     "components": r"^Components: ",
     "duration": r"^Duration: (?:(Concentration), )([\w\s]+)",
     "spell_lists": r"^Spell Lists\. ([\w\s,]+)",

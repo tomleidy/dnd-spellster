@@ -8,7 +8,9 @@ from bs4 import BeautifulSoup
 from patterns import regex_dict, schools_dict
 
 # pylint: disable=W0612
-DEBUG = {"stripped_tags"}
+# DEBUG = {"short", "range"}
+DEBUG = {"range"}
+# print(int("1,000".replace(",","")))
 
 # generate database
 # create dictionaries of data from each
@@ -129,7 +131,7 @@ def get_source(html) -> str:
         result = result.group(1)
         if "source" in DEBUG:
             print(result)
-        return result
+        return {"source": result}
     return None
 
 
@@ -202,6 +204,51 @@ def get_title(soup) -> str:
     return title
 
 
+regex_range_dict = {
+    "focus_and_shape": r"Self \((\d+)-(([\w]+)[ -]([\w ]+)\))",
+    "descriptive": r"^(Sight|Special|Touch|Unlimited|Self)$",
+    "distance_and_units": r"([\d,]+)[- ](feet|ft|miles?)"
+}
+
+range_dict_base = {"range_distance": None, "range_units": None,
+                   "range_focus": None, "range_string": None}
+
+
+def get_range(html: str) -> dict:
+    """ Get range from provided string """
+    section = re.search(regex_dict["range"], html, flags=re.IGNORECASE | re.MULTILINE)
+    if not section:
+        return None
+    section = section.group(1)
+    range_dict = dict(range_dict_base)
+    unit, distance, focus, shape = [None, None, None, None]
+    descriptive = re.match(regex_range_dict["descriptive"], section)
+    shaped = re.search(regex_range_dict["focus_and_shape"], section)
+    vectored = re.search(regex_range_dict["distance_and_units"], section)
+    if descriptive:
+        if section == "Self":
+            focus = "Self"
+        else:
+            distance = section
+    elif shaped:
+        distance = int(shaped.group(1).replace(",", ""))
+        unit = shaped.group(3)
+        shape = f"{distance}-{shaped.group(3)} {shaped.group(4)}"
+        focus = "Self"
+        range_dict.update({})
+    elif vectored:
+        distance = int(vectored.group(1).replace(",", ""))
+        unit = vectored.group(2)
+    if unit in {"foot", "ft"}:
+        unit = "feet"
+    range_dict.update({"range_distance": distance, "range_units": unit,
+                       "range_focus": focus, "range_string": shape
+                       })
+    if "range" in DEBUG:
+        print(range_dict)
+    return range_dict
+
+
 def parse_spell_file(soup: BeautifulSoup) -> dict:
     """ Process an individual spell file """
     if not soup:
@@ -219,14 +266,14 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
     # page_content.insert(0, f"Title: {title}")
     for x in page_content:
         str_line = strip_tags(str(x))
-
         source = get_source(str_line)
-        if source:
-            spell_dict["source"] = source
         level_school_etc = get_level_and_school_etc(str_line)
-        if level_school_etc:
-            spell_dict.update(level_school_etc)
         casting_time = get_casting_time(str_line)
+        spell_range = get_range(str_line)
+
+        for result in [source, level_school_etc, casting_time, spell_range]:
+            if result:
+                spell_dict.update(result)
 
     if "parse_dict" in DEBUG:
         print(spell_dict)
