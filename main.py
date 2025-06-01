@@ -3,43 +3,31 @@ import sys
 import os
 import re
 import argparse
-from typing import List, Tuple
+from typing import List
 from bs4 import BeautifulSoup
-from patterns import regex_dict, schools_dict
-from patterns import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
-from patterns import is_range
+from patterns import regex_dict, regex_range_dict
+from helpers import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
+from helpers import is_range, is_components
+from parsers import RE_FLAGS
+from parsers import casting_time_dict_base
+from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time
 
 # pylint: disable=W0612
-# choices {"short", "range", "parsed_dict", "casting_time, "level_etc", "stripped_tags"}
-DEBUG = {"parsed_dict", "title"}
-RE_FLAGS = re.IGNORECASE | re.MULTILINE
 
 # generate database
 # create dictionaries of data from each
-
-# manage character data
-# level, max hit points, (current hp?)
-# spell slots/levels
-# prepared status of spells
-# filter out unprepared
-# filter by: action type, reaction, bonus action
-# filter for concentration / no concentration
-# filter for damage, healing, buffing, debuffing
-# sort by: range?
 
 
 parser = argparse.ArgumentParser(description="Parse D&D 5e spell files.")
 parser.add_argument('directory', type=str, help='Directory containing spell HTML files.')
 parser.add_argument('-s', '--short', action="store_true", help="Run abridged")
 
+args = parser.parse_args()
+
 
 def main():
     """ Main operational part of script """
-    args = parser.parse_args()
     directory = args.directory
-
-    if args.short:
-        DEBUG.add("short")
 
     spell_files = get_list_of_files(directory)
     spells = []
@@ -48,7 +36,7 @@ def main():
             soup = open_html_file(file_path)
             spell_data = parse_spell_file(soup)
             spells.append(spell_data)
-            if "short" in DEBUG and len(spells) >= 2:
+            if args.short and len(spells) >= 2:
                 sys.exit()
         except KeyboardInterrupt:
             print("\nExiting from Ctrl-C...")
@@ -70,117 +58,6 @@ def open_html_file(file_path: str) -> BeautifulSoup:
     return BeautifulSoup(content, 'html.parser')
 
 
-def load_temp_file():
-    filename = "casting_times.txt"
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as file:
-            return file.readlines()
-
-
-def run_casting_time_txt():
-    lines = load_temp_file()
-    for line in lines:
-        print(get_casting_time(line))
-
-
-casting_time_dict_base_list = ['casting_time_noncombat', 'casting_time_noncombat_unit', 'casting_time_combat',
-                               'casting_time_combat_unit', 'casting_time_reaction_condition']
-casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
-
-
-def get_noncombat_dict(non_combat):
-    return {"casting_time_noncombat": int(non_combat.group(1)),
-            "casting_time_noncombat_unit": non_combat.group(2).lower()
-            }
-
-
-def get_combat_dict(combat):
-    return {"casting_time_combat": int(combat.group(1)),
-            "casting_time_combat_unit": combat.group(2).lower()
-            }
-
-
-def get_casting_time(html) -> str:
-    """ Return casting time from HTML """
-    result = re.findall(regex_dict["casting_times_only"], html, RE_FLAGS)
-    if not result:
-        return None
-    casting_time_dict = dict(casting_time_dict_base)
-    for group in result:
-        if not group:
-            continue
-        regex_combat = regex_dict["casting_time_combat"]
-        regex_noncombat = regex_dict["casting_time_noncombat"]
-        combat = re.search(regex_combat, group, RE_FLAGS)
-        non_combat = re.search(regex_noncombat, group, RE_FLAGS)
-        if combat:
-            if casting_time_dict["casting_time_combat"] is not None:
-                raise RuntimeError("Data has two combat casting times")
-            casting_time_dict.update(get_combat_dict(combat))
-        elif non_combat:
-            if casting_time_dict["casting_time_noncombat"] is not None:
-                raise RuntimeError("Data has two non-combat casting times")
-            casting_time_dict.update(get_noncombat_dict(non_combat))
-    condition = re.findall(regex_dict["casting_time_reaction_conditions"], html, RE_FLAGS)
-    if condition:
-        casting_time_dict.update({"casting_time_reaction_condition": condition[0]})
-    return casting_time_dict
-
-
-def get_source(html) -> str:
-    """ Parse and return source from HTML """
-    result = re.search(regex_dict["source"], html)
-    if result:
-        result = result.group(1)
-        return {"source": result}
-    return {}
-
-
-def normalize_level_school_result(level_school_result: list) -> list:
-    """ Re-organize result to be level (int), school (string), extra1, extra2"""
-    if not level_school_result:
-        return None
-    level = -1
-    school = ""
-    if level_school_result[1] == 'cantrip':
-        level = 0
-        school = level_school_result[0]
-    elif level_school_result[1] in schools_dict:
-        level = int(level_school_result[0])
-        school = schools_dict[level_school_result[1]]  # fix case for school
-
-    ritual = False
-    subschool = None
-    for x in range(2, 4):  # fix case for extra school stuff
-        current_extra = level_school_result[x]
-        if current_extra == "ritual":
-            ritual = True
-        elif current_extra in schools_dict:
-            subschool = schools_dict[level_school_result[x]]
-
-    if level == -1:
-        return None
-
-    return {"level": level, "school": school, "ritual": ritual, "subschool": subschool}
-
-
-def get_level_and_school_etc(html: str) -> Tuple[str]:
-    """ Parse and return school and level from html """
-    html = html.lower()
-    result_list = []
-    result = re.search(regex_dict["level_school"], html, flags=re.IGNORECASE)
-    if result:
-        for x in range(1, 5):
-            result_list.append(result.group(x))
-    else:
-        result = re.search(regex_dict["school_cantrip"], html, flags=re.IGNORECASE)
-        if result:
-            for x in range(1, 5):
-                result_list.append(result.group(x))
-    result_list = normalize_level_school_result(result_list)
-    return result_list
-
-
 def strip_tags(html) -> str:
     """ Remove <p> and </p> tags from HTML"""
     p_close = r"</p>"
@@ -189,22 +66,6 @@ def strip_tags(html) -> str:
     html = re.sub(p_open, "", html, RE_FLAGS)
     return html.strip()
 
-
-def get_title(soup) -> str:
-    """ Take soup, get title """
-    regex_title = r"^(.+) - DND 5th Edition"
-    title = soup.find("title").get_text()
-    title = re.search(regex_title, title)
-    if title:
-        title = title.group(1)
-    return title
-
-
-regex_range_dict = {
-    "focus_and_shape": r"Self \((\d+)-(([\w]+)[ -]?([\w ]+)\))",
-    "descriptive": r"^(Sight|Special|Touch|Unlimited|Self)$",
-    "distance_and_units": r"([\d,]+)[- ]?(feet|ft|miles?)"
-}
 
 range_dict_base = {"range_distance": None, "range_units": None,
                    "range_focus": None, "range_string": None}
@@ -314,6 +175,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         elif does_line_need_splitting(str_line):
             print(f"=~= Line needs splitting: {str_line.split("\n")}")
             for line in str_line.split("\n"):
+                line = santize_string(line)
                 if is_casting_time(line):
                     casting_time = get_casting_time(line)
                     spell_dict.update(casting_time)
@@ -322,12 +184,22 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                     range_info = get_range(line)
                     spell_dict.update(range_info)
                     print(f"=== Updated range for {spell_dict["title"]}: {range_info}")
+                elif is_components(line):
+                    print(f"*** Line is components! {line}")
                 else:
                     print(f"--- Line needs parsing? {line}")
         else:
-            print(f"xxx broken with line: {str_line}")
+            print(f"-x- broken with line: {str_line}")
 
     return spell_dict
+
+
+def santize_string(line: str) -> str:
+    """ Get rid of some weird gunk in strings please"""
+    replacements = [("–", "-"), (" ", " "), ("’", "'")]
+    for search, replace in replacements:
+        line.replace(search, replace)
+    return line
 
 
 def process_casting_time_p_block(html) -> dict:

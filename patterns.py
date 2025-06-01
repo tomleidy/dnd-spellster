@@ -1,3 +1,4 @@
+""" The engine for this madness. The regular expressions and related constants. """
 import re
 
 schools_dict = {
@@ -11,6 +12,12 @@ REGEX_SCHOOLS = "|".join(schools_dict.keys())
 REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
 REGEX_ORDINAL = r"(?:st|nd|rd|th)"
 
+regex_range_dict = {
+    "focus_and_shape": r"Self \((\d+)-(([\w]+)[ -]?([\w ]+)\))",
+    "descriptive": r"^(Sight|Special|Touch|Unlimited|Self)$",
+    "distance_and_units": r"([\d,]+)[- ]?(feet|ft|miles?)"
+}
+
 regex_dict = {
     "title": r"^Title: .+$",
     "source": r"^Source: ([\w\W]+)$",
@@ -22,7 +29,7 @@ regex_dict = {
     "casting_time_noncombat": r"(\d+) +((?:hours?|minutes?))",
     "casting_time_reaction_conditions": r", ([\w ,]+when[\w ,]+)",
     "range": r"Range: ([\w\s(),-]+)(?:\nComponents)?",
-    "components": r"^Components: ",
+    "components": r"^Components:\s([VSM, ]+)(?: \((.+)\))?",
     "duration": r"^Duration: (?:(Concentration), )([\w\s]+)",
     "spell_lists": r"^Spell Lists\. ([\w\s,]+)",
     # might be multiple descriptions, test iterations (make sure they don't match spell list first)
@@ -30,29 +37,3 @@ regex_dict = {
 
 }
 RE_FLAGS = re.IGNORECASE
-
-
-def is_source(line: str) -> bool:
-    """ Is this section the source book? """
-    return re.match(regex_dict["source"], line, flags=RE_FLAGS)
-
-
-def is_level_school_etc(line: str) -> bool:
-    """ Does this line contain school and level? """
-    return re.match(regex_dict["level_school"], line, flags=RE_FLAGS) or \
-        re.match(regex_dict["school_cantrip"], line, flags=RE_FLAGS)
-
-
-def is_casting_time(line: str) -> bool:
-    """ Does this line contain casting time? """
-    return re.match(regex_dict["casting_time"], line, flags=RE_FLAGS)
-
-
-def does_line_need_splitting(line: str) -> bool:
-    """ Is this a multiline string? """
-    return "\n" in line
-
-
-def is_range(line: str) -> bool:
-    """ Does this line contain range information? """
-    return re.match(regex_dict["range"], line, flags=RE_FLAGS)
