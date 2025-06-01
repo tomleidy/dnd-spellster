@@ -11,7 +11,7 @@ from helpers import is_range, is_components
 from parsers import RE_FLAGS
 from parsers import casting_time_dict_base, range_dict_base
 from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time, get_range
-
+from parsers import get_components
 
 # generate database
 # create dictionaries of data from each
@@ -147,7 +147,8 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                     spell_dict.update(range_info)
                     print(f"=== Updated range for {spell_dict["title"]}: {range_info}")
                 elif is_components(line):
-                    print(f"*** Line is components! {line}")
+                    components = get_components(line)
+                    print(f"=== Updated components for {spell_dict["title"]}: {components}")
                 else:
                     print(f"--- Line needs parsing? {line}")
         else:

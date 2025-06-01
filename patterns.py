@@ -29,7 +29,7 @@ regex_dict = {
     "casting_time_noncombat": r"(\d+) +((?:hours?|minutes?))",
     "casting_time_reaction_conditions": r", ([\w ,]+when[\w ,]+)",
     "range": r"Range: ([\w\s(),-]+)(?:\nComponents)?",
-    "components": r"^Components:\s([VSM, ]+)(?: \((.+)\))?",
+    "components": r"^Components:\s([VSM, ]+)(?:\s\(([\w\.,;’' -]+)\))?",
     "duration": r"^Duration: (?:(Concentration), )([\w\s]+)",
     "spell_lists": r"^Spell Lists\. ([\w\s,]+)",
     # might be multiple descriptions, test iterations (make sure they don't match spell list first)

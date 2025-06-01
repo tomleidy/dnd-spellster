@@ -1,5 +1,5 @@
 import os
-from parsers import get_casting_time
+from parsers import get_casting_time, get_components
 
 
 def load_temp_file(filename):
@@ -18,5 +18,13 @@ def run_casting_time_txt():
         print(get_casting_time(line))
 
 
+def run_components_txt():
+    """ Iterate over results from file"""
+    lines = load_temp_file("components.txt")
+    print(f"Testing casting time parsing on {len(lines)} lines")
+    for line in lines:
+        print(get_components(line))
+
+
 if __name__ == "__main__":
-    run_casting_time_txt()
+    run_components_txt()

@@ -12,7 +12,6 @@ casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
 range_dict_base = {"range_distance": None, "range_units": None,
                    "range_focus": None, "range_string": None}
 
-
 RE_FLAGS = re.IGNORECASE | re.MULTILINE
 
 
@@ -154,3 +153,32 @@ def get_range(html: str) -> dict:
                        "range_focus": focus, "range_string": shape
                        })
     return range_dict
+
+
+components_dict_base = {
+    "components_verbal": False,
+    "components_somatic": False,
+    "components_material": False,
+    "components_material_details": None
+}
+
+
+def get_components(html: str) -> dict:
+    """ Get components from string """
+    components = dict(components_dict_base)
+    print(html)
+    result = re.search(regex_dict["components"], html, flags=RE_FLAGS)
+    for group in result.groups():
+        if not group:
+            continue
+        if re.match(r"[VSM, ]+", group, flags=RE_FLAGS):
+            group = re.sub("[ ,]", "", group.upper())
+            if "V" in group:
+                components["components_verbal"] = True
+            if "S" in group:
+                components["components_somatic"] = True
+            if "M" in group:
+                components["components_material"] = True
+        else:
+            components["components_material_details"] = group
+    return components
