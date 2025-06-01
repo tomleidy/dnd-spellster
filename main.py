@@ -5,14 +5,13 @@ import re
 import argparse
 from typing import List
 from bs4 import BeautifulSoup
-from patterns import regex_dict, regex_range_dict
+from helpers import santize_string
 from helpers import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
 from helpers import is_range, is_components
 from parsers import RE_FLAGS
-from parsers import casting_time_dict_base
-from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time
+from parsers import casting_time_dict_base, range_dict_base
+from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time, get_range
 
-# pylint: disable=W0612
 
 # generate database
 # create dictionaries of data from each
@@ -65,43 +64,6 @@ def strip_tags(html) -> str:
     html = re.sub(p_close, "\n", html, RE_FLAGS)
     html = re.sub(p_open, "", html, RE_FLAGS)
     return html.strip()
-
-
-range_dict_base = {"range_distance": None, "range_units": None,
-                   "range_focus": None, "range_string": None}
-
-
-def get_range(html: str) -> dict:
-    """ Get range from provided string """
-    section = re.search(regex_dict["range"], html, flags=RE_FLAGS)
-    if not section:
-        return None
-    section = section.group(1)
-    range_dict = dict(range_dict_base)
-    unit, distance, focus, shape = [None, None, None, None]
-    descriptive = re.match(regex_range_dict["descriptive"], section)
-    shaped = re.search(regex_range_dict["focus_and_shape"], section)
-    vectored = re.search(regex_range_dict["distance_and_units"], section)
-    if descriptive:
-        if section == "Self":
-            focus = "Self"
-        else:
-            distance = section
-    elif shaped:
-        distance = int(shaped.group(1).replace(",", ""))
-        unit = shaped.group(3)
-        shape = f"{distance}-{shaped.group(3)} {shaped.group(4)}"
-        focus = "Self"
-        range_dict.update({})
-    elif vectored:
-        distance = int(vectored.group(1).replace(",", ""))
-        unit = vectored.group(2)
-    if unit in {"foot", "ft"}:
-        unit = "feet"
-    range_dict.update({"range_distance": distance, "range_units": unit,
-                       "range_focus": focus, "range_string": shape
-                       })
-    return range_dict
 
 
 def count_datapoints(spells) -> None:
@@ -192,26 +154,6 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
             print(f"-x- broken with line: {str_line}")
 
     return spell_dict
-
-
-def santize_string(line: str) -> str:
-    """ Get rid of some weird gunk in strings please"""
-    replacements = [("–", "-"), (" ", " "), ("’", "'")]
-    for search, replace in replacements:
-        line.replace(search, replace)
-    return line
-
-
-def process_casting_time_p_block(html) -> dict:
-    """ For the section containing:
-    casting time, range, components, duration"""
-    if not html:
-        return {}
-    results = {}
-    for line in html.split("\n"):
-        results.update(get_casting_time(line))
-        results.update(get_range(line))
-    return results
 
 
 if __name__ == "__main__":

@@ -2,12 +2,15 @@
 
 import re
 from typing import Tuple
-from patterns import regex_dict, schools_dict
+from patterns import regex_dict, schools_dict, regex_range_dict
 
 casting_time_dict_base_list = ['casting_time_noncombat', 'casting_time_noncombat_unit',
                                'casting_time_combat', 'casting_time_combat_unit',
                                'casting_time_reaction_condition']
 casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
+
+range_dict_base = {"range_distance": None, "range_units": None,
+                   "range_focus": None, "range_string": None}
 
 
 RE_FLAGS = re.IGNORECASE | re.MULTILINE
@@ -118,3 +121,36 @@ def get_combat_dict(combat):
     return {"casting_time_combat": int(combat.group(1)),
             "casting_time_combat_unit": combat.group(2).lower()
             }
+
+
+def get_range(html: str) -> dict:
+    """ Get range from provided string """
+    section = re.search(regex_dict["range"], html, flags=RE_FLAGS)
+    if not section:
+        return None
+    section = section.group(1)
+    range_dict = dict(range_dict_base)
+    unit, distance, focus, shape = [None, None, None, None]
+    descriptive = re.match(regex_range_dict["descriptive"], section)
+    shaped = re.search(regex_range_dict["focus_and_shape"], section)
+    vectored = re.search(regex_range_dict["distance_and_units"], section)
+    if descriptive:
+        if section == "Self":
+            focus = "Self"
+        else:
+            distance = section
+    elif shaped:
+        distance = int(shaped.group(1).replace(",", ""))
+        unit = shaped.group(3)
+        shape = f"{distance}-{shaped.group(3)} {shaped.group(4)}"
+        focus = "Self"
+        range_dict.update({})
+    elif vectored:
+        distance = int(vectored.group(1).replace(",", ""))
+        unit = vectored.group(2)
+    if unit in {"foot", "ft"}:
+        unit = "feet"
+    range_dict.update({"range_distance": distance, "range_units": unit,
+                       "range_focus": focus, "range_string": shape
+                       })
+    return range_dict

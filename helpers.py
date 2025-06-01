@@ -1,7 +1,21 @@
-""" Helper functions to test if a string matches a pattern """
+"""
+Helper functions
+- to test if a string matches a pattern
+- to replace unexpected characters
+
+"""
 
 import re
 from patterns import regex_dict, RE_FLAGS
+
+SANITIZE_PAIRS = [("–", "-"), (" ", " "), ("’", "'")]
+
+
+def santize_string(line: str) -> str:
+    """ Get rid of some weird gunk in strings please"""
+    for search, replace in SANITIZE_PAIRS:
+        line.replace(search, replace)
+    return line
 
 
 def is_source(line: str) -> bool:
