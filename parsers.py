@@ -181,3 +181,18 @@ def get_components(html: str) -> dict:
         else:
             components["components_material_details"] = group
     return components
+
+
+def get_duration(html: str) -> dict:
+    """ Get durations from string """
+    duration = {"concentration": False, "duration": None}
+    result = re.search(regex_dict["duration"], html, flags=RE_FLAGS)
+    # print(result.groups())
+    for group in result.groups():
+        if not group:
+            continue
+        if group == "Concentration":
+            duration["concentration"] = True
+        else:
+            duration["duration"] = group.lower()
+    return duration

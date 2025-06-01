@@ -7,11 +7,12 @@ from typing import List
 from bs4 import BeautifulSoup
 from helpers import santize_string
 from helpers import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
-from helpers import is_range, is_components
+from helpers import is_range, is_components, is_duration
+
 from parsers import RE_FLAGS
 from parsers import casting_time_dict_base, range_dict_base, components_dict_base
 from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time, get_range
-from parsers import get_components
+from parsers import get_components, get_duration
 
 # generate database
 # create dictionaries of data from each
@@ -155,6 +156,10 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                     components = get_components(line)
                     spell_dict.update(components)
                     print(f"=== Updated components for {spell_dict["title"]}: {components}")
+                elif is_duration(line):
+                    duration = get_duration(line)
+                    spell_dict.update(duration)
+                    print(f"=== Updated duration for {spell_dict["title"]}: {duration}")
                 else:
                     print(f"--- Line needs parsing? {line}")
         else:
