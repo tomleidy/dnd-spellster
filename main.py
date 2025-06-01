@@ -8,9 +8,9 @@ from bs4 import BeautifulSoup
 from patterns import regex_dict, schools_dict
 
 # pylint: disable=W0612
-# DEBUG = {"short", "range"}
-DEBUG = {"range"}
-# print(int("1,000".replace(",","")))
+# choices {"short", "range", "parse_dict", "casting_time, "level_etc"}
+DEBUG = {"stripped_tags"}
+
 
 # generate database
 # create dictionaries of data from each
@@ -47,6 +47,7 @@ def main():
         except KeyboardInterrupt:
             print("\nExiting from Ctrl-C...")
             sys.exit()
+    count_datapoints(spells)
 #        return
 
     # for spell in spells:
@@ -69,10 +70,10 @@ def open_html_file(file_path: str) -> BeautifulSoup:
 
 def parse_casting_time_and_units(casting_time_list: List[str]) -> dict:
     """ Parse out _just_ casting times and units"""
-    casting_time_dict = {}
-    regex_parsing_casting_time = r"(?:(\d+) ([\w\s]+)|(\d+) (hours?|minutes?))"
+    casting_time_dict = dict(casting_time_dict_base)
+    regex_parsing_casting_time = r"(?:(\d+) ([\s\S]+)|(\d+) (hours?|minutes?))"
     for time_and_units in casting_time_list:
-        re_result = re.search(regex_parsing_casting_time, time_and_units)
+        re_result = re.search(regex_parsing_casting_time, time_and_units, re.IGNORECASE | re.MULTILINE)
         num_groups = re.compile(regex_parsing_casting_time).groups
         result = [re_result.group(x) for x in range(1, num_groups)]
         tmp_value = None
@@ -82,16 +83,17 @@ def parse_casting_time_and_units(casting_time_list: List[str]) -> dict:
             if not tmp_value and group.isnumeric():
                 tmp_value = int(group)
                 continue
+            group = group.lower()
             if tmp_value and "action" in group:
-                if "casting_time_combat_unit" in casting_time_dict:
+                if casting_time_dict["casting_time_combat_unit"] is not None:
                     raise RuntimeError("Data has two different action based casting times")
                 casting_time_dict["casting_time_combat"] = int(tmp_value)
-                casting_time_dict["casting_time_combat_unit"] = group.lower()
-            elif re.search(r"(hours?|minutes?)", group):
-                if "casting_time_unit" in casting_time_dict:
+                casting_time_dict["casting_time_combat_unit"] = group
+            elif re.search(r"(hours?|minutes?)", group, flags=re.IGNORECASE | re.MULTILINE):
+                if casting_time_dict["casting_time_unit"] is not None:
                     raise RuntimeError("Data has two different (non-combat) casting times")
                 casting_time_dict["casting_time"] = int(tmp_value)
-                casting_time_dict["casting_time_unit"] = group.lower()
+                casting_time_dict["casting_time_unit"] = group
             tmp_value = None
     return casting_time_dict
 
@@ -117,10 +119,13 @@ def get_casting_time(html) -> str:
     casting_time_dict = {}
     if not result:
         return None
+    if debug_this_spell:
+        print("get_casting_time html:", html)
+        # print("get_casting_time re.search result:", result)
     result = parse_casting_time_and_conditions(result.group(1))
     casting_time_dict.update(result)
-    if "casting time" in DEBUG and casting_time_dict:
-        print(casting_time_dict)
+    if "casting_time" in DEBUG and casting_time_dict:
+        print("DEBUG get_casting_time:", casting_time_dict)
     return casting_time_dict
 
 
@@ -163,21 +168,21 @@ def normalize_level_school_result(level_school_result: list) -> list:
     return {"level": level, "school": school, "ritual": ritual, "subschool": subschool}
 
 
-def get_level_and_school_etc(html) -> Tuple[str]:
+def get_level_and_school_etc(html: str) -> Tuple[str]:
     """ Parse and return school and level from html """
+    html = html.lower()
     result_list = []
     result = re.search(regex_dict["level_school"], html, flags=re.IGNORECASE)
     if result:
         for x in range(1, 5):
             result_list.append(result.group(x))
-
-    if not result:
+    else:
         result = re.search(regex_dict["school_cantrip"], html, flags=re.IGNORECASE)
         if result:
             for x in range(1, 5):
                 result_list.append(result.group(x))
     result_list = normalize_level_school_result(result_list)
-    if "level etc" in DEBUG and result_list:
+    if "level_etc" in DEBUG and result_list:
         print(result_list)
     return result_list
 
@@ -205,9 +210,9 @@ def get_title(soup) -> str:
 
 
 regex_range_dict = {
-    "focus_and_shape": r"Self \((\d+)-(([\w]+)[ -]([\w ]+)\))",
+    "focus_and_shape": r"Self \((\d+)-(([\w]+)[ -]?([\w ]+)\))",
     "descriptive": r"^(Sight|Special|Touch|Unlimited|Self)$",
-    "distance_and_units": r"([\d,]+)[- ](feet|ft|miles?)"
+    "distance_and_units": r"([\d,]+)[- ]?(feet|ft|miles?)"
 }
 
 range_dict_base = {"range_distance": None, "range_units": None,
@@ -249,6 +254,57 @@ def get_range(html: str) -> dict:
     return range_dict
 
 
+broken_set = {
+    "Nathair's Mischief",
+    "Rime's Binding Ice",
+    "Mass Polymorph",
+    "Summon Draconic Spirit",
+    "Draconic Transformation",
+    "Antagonize"
+}
+
+casting_time_dict_base_list = ['casting_time', 'casting_time_unit', 'casting_time_combat',
+                               'casting_time_combat_unit', 'casting_conditions']
+casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
+
+
+def count_datapoints(spells) -> None:
+    """ Print out count of each type of data """
+    keys = ["titles", "sources", "levels", "schools", "subschools", "casting_times",
+            "ranges", "components", "durations", "lists", "descriptions"]
+    counts = {key: 0 for key in keys}
+    casting_time_keys = casting_time_dict_base.keys()
+    range_keys = range_dict_base.keys()
+    for spell in spells:
+
+        if spell["title"]:
+            counts["titles"] += 1
+        if spell["source"]:
+            counts["sources"] += 1
+        if spell["level"] is not None:
+            counts["levels"] += 1
+        if spell["school"]:
+            counts["schools"] += 1
+        if spell["subschool"] is not None:
+            counts["subschools"] += 1
+
+        for idx, key in enumerate(casting_time_keys):
+            if idx == len(casting_time_keys)-1:
+                print(spell)
+            if key in spell and spell[key] is not None:
+                counts["casting_times"] += 1
+                break
+        for key in range_keys:
+            if key in spell:
+                counts["ranges"] += 1
+                break
+
+    print(counts)
+
+
+debug_this_spell = False
+
+
 def parse_spell_file(soup: BeautifulSoup) -> dict:
     """ Process an individual spell file """
     if not soup:
@@ -260,11 +316,20 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         for element in soup.select(tag):
             element.unwrap()
     page_content = soup.find_all('p')
+    global DEBUG
+    global debug_this_spell
     # print(get_source(page_content))
     title = get_title(soup)
+    if title in broken_set:
+        debug_this_spell = True
+        DEBUG = {"casting_times"}
+    else:
+        DEBUG = {}
+        debug_this_spell = False
     spell_dict = {"title": title}
-    # page_content.insert(0, f"Title: {title}")
+    page_content.insert(0, f"Title: {title}")
     for x in page_content:
+
         str_line = strip_tags(str(x))
         source = get_source(str_line)
         level_school_etc = get_level_and_school_etc(str_line)
@@ -274,10 +339,9 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         for result in [source, level_school_etc, casting_time, spell_range]:
             if result:
                 spell_dict.update(result)
-
-    if "parse_dict" in DEBUG:
+    if "parse_dict" in DEBUG or debug_this_spell:
         print(spell_dict)
-
+    print("")
     return spell_dict
 
 
