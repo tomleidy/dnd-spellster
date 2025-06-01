@@ -1,0 +1,25 @@
+Casting Time: 1 action
+Casting Time: 1 Action
+Casting Time: 1 action or 8 hours
+Casting Time: 1 bonus action
+Casting Time: 1 Bonus Action
+Casting Time: 1 hour
+Casting Time: 1 minute
+Casting Time: 1 reaction, taken when a creature you see makes an attack roll or starts to cast a spell
+Casting Time: 1 reaction, which you take when a creature you can see within 60 feet of yourself succeeds on an attack roll, an ability check, or a saving throw
+Casting Time: 1 reaction, which you take when a humanoid you can see within 60 feet of you dies
+Casting Time: 1 reaction, which you take when you are damaged by a creature within 60 feet of you that you can see
+Casting Time: 1 reaction, which you take when you are forced to make an Intelligence, a Wisdom, or a Charisma saving throw
+Casting Time: 1 reaction, which you take when you are hit by an attack or targeted by the magic missile spell
+Casting Time: 1 reaction, which you take when you or a creature within 60 feet of you falls
+Casting Time: 1 reaction, which you take when you see a creature within 60 feet of you casting a spell
+Casting Time: 1 reaction, which you take when you speak to another creature
+Casting Time: 1 reaction, which you take when you take acid, cold, fire, lightning, or thunder damage
+Casting Time: 10 minutes
+Casting Time: 12 hours
+Casting Time: 24 hours
+Casting Time: 8 hours
+
+
+
+r"^Casting Time: (\d+) (action|bonus action|reaction|hours?|minutes?)
