@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from patterns import regex_dict, schools_dict
 
 # pylint: disable=W0612
-DEBUG = {"casting time"}
+DEBUG = {"stripped_tags"}
 
 # generate database
 # create dictionaries of data from each
@@ -187,7 +187,7 @@ def strip_tags(html) -> str:
     p_open = r"<p>"
     combined = rf"{br_tag}|{p_close}|{p_open}"
     html = re.sub(combined, "", html, flags=re.IGNORECASE | re.MULTILINE)
-    if "stripped tags" in DEBUG:
+    if "stripped_tags" in DEBUG:
         print(html)
     return html
 
