@@ -65,28 +65,19 @@ def open_html_file(file_path: str) -> BeautifulSoup:
     return BeautifulSoup(content, 'html.parser')
 
 
-def get_casting_time_or(result) -> dict:
-    """ Parse out the alternative casting times if there's an or (as of 2025/05/31, only one case, but still)"""
-
-
-def parse_casting_time(casting_time_string: str) -> dict:
-    """ Parse sections of casting time out into dictionary """
+def parse_casting_time_and_units(casting_time_list: List[str]) -> dict:
+    """ Parse out _just_ casting times and units"""
     casting_time_dict = {}
-    if ", " in casting_time_string:
-        casting_time_list = casting_time_string.split(", ")
-        casting_time_dict["casting_conditions"] = ", ".join(casting_time_list[1:])
-        casting_time_string = casting_time_list[0].strip()
-    if " or " in casting_time_string:
-        casting_time_list = casting_time_string.split(" or ")
-    else:
-        casting_time_list = [casting_time_string]
     regex_parsing_casting_time = r"(?:(\d+) ([\w\s]+)|(\d+) (hours?|minutes?))"
     for time_and_units in casting_time_list:
         re_result = re.search(regex_parsing_casting_time, time_and_units)
-        result = [re_result.group(x) for x in range(1, re.compile(regex_parsing_casting_time).groups)]
+        num_groups = re.compile(regex_parsing_casting_time).groups
+        result = [re_result.group(x) for x in range(1, num_groups)]
         tmp_value = None
         for group in result:
-            if not tmp_value and group and group.isnumeric():
+            if not group:
+                continue
+            if not tmp_value and group.isnumeric():
                 tmp_value = int(group)
                 continue
             if tmp_value and "action" in group:
@@ -103,14 +94,28 @@ def parse_casting_time(casting_time_string: str) -> dict:
     return casting_time_dict
 
 
+def parse_casting_time_and_conditions(casting_time_string: str) -> dict:
+    """ Parse sections of casting time out into dictionary """
+    casting_time_dict = {}
+    if ", " in casting_time_string:
+        casting_time_list = casting_time_string.split(", ")
+        casting_time_dict["casting_conditions"] = ", ".join(casting_time_list[1:])
+        casting_time_string = casting_time_list[0].strip()
+    if " or " in casting_time_string:
+        casting_time_list = casting_time_string.split(" or ")
+    else:
+        casting_time_list = [casting_time_string]
+    casting_time_dict.update(parse_casting_time_and_units(casting_time_list))
+    return casting_time_dict
+
+
 def get_casting_time(html) -> str:
     """ Return casting time from HTML """
     result = re.search(regex_dict["casting_time"], html, flags=re.IGNORECASE | re.MULTILINE)
     casting_time_dict = {}
     if not result:
         return None
-    print(result)
-    result = parse_casting_time(result.group(1))
+    result = parse_casting_time_and_conditions(result.group(1))
     casting_time_dict.update(result)
     if "casting time" in DEBUG and casting_time_dict:
         print(casting_time_dict)
@@ -225,7 +230,6 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
 
     if "parse_dict" in DEBUG:
         print(spell_dict)
-    print("")
 
     return spell_dict
 
