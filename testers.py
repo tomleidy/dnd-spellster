@@ -1,5 +1,7 @@
+""" Functions to help examine what the parser functions do on files containing all unique examples of various field data """
+
 import os
-from parsers import get_casting_time, get_components, get_duration
+from parsers import get_casting_time, get_components, get_duration  # pylint: disable=W0611
 
 
 def load_temp_file(filename):
