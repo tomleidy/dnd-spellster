@@ -67,5 +67,6 @@ def get_class_column_name(pc_class: str) -> dict:
         class_name = classes_dict[lookup_class]
         if pc_class.endswith("(Optional)"):
             class_name += "_optional"
+        class_name = f"class_{class_name}"
         new_class_dict[class_name] = True
     return new_class_dict
