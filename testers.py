@@ -46,11 +46,11 @@ def count_datapoints(spells) -> None:
             counts["titles"] += 1
         if test_for_keys_in_dict(["source"], spell, "sources"):
             counts["sources"] += 1
-        if test_for_keys_in_dict(["level"], spell, "levels, etc."):
+        if test_levels_in_dict(spell):
             counts["levels"] += 1
         if test_for_keys_in_dict(["school"], spell, "schools"):
             counts["schools"] += 1
-        if test_for_keys_in_dict(["subschool"], spell, "subschools"):
+        if test_for_keys_in_dict(["subschool"], spell, "subschools",True):
             counts["subschools"] += 1
 
         if test_for_keys_in_dict(["duration","concentration"], spell, "durations"):
@@ -66,12 +66,18 @@ def count_datapoints(spells) -> None:
 
     print(counts, file=sys.stderr)
 
-def test_for_keys_in_dict(keys: list, spell: dict, group: str = ""):
+def test_levels_in_dict(spell: dict):
+        if "level" in spell and spell["level"] >=0:
+            return True
+        return False
+
+def test_for_keys_in_dict(keys: list, spell: dict, group: str = "",ignore_absence: bool=False):
     """ Determine if any key in list is in dictionary and True"""
     for key in keys:
         if key in spell and spell[key]:
             return True
-    print(f"{spell['title']} missing in {group}")
+    if not ignore_absence:
+        print(f"{spell['title']} missing in {group}")
     return False
 
 if __name__ == "__main__":
