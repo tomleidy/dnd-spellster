@@ -2,6 +2,7 @@
 import sys
 import os
 import re
+import json
 import argparse
 from typing import List
 from bs4 import BeautifulSoup
@@ -42,7 +43,13 @@ def main():
         except KeyboardInterrupt:
             print("\nExiting from Ctrl-C...")
             sys.exit()
+    write_json(spells)
     count_datapoints(spells)
+
+
+def write_json(data: dict, filename: str="spells.json") -> None:
+    with open(filename, "w", encoding="utf-8") as file:
+        json.dump(data, file, indent=4)
 
 
 def get_list_of_files(directory) -> List[str]:
@@ -67,17 +74,6 @@ def strip_tags(html) -> str:
     html = re.sub(p_open, "", html, RE_FLAGS)
     return html.strip()
 
-
-DEBUG_THIS_SPELL = False
-broken_set = {}
-unbroken_set = {
-    "Nathair's Mischief",
-    "Rime's Binding Ice",
-    "Mass Polymorph",
-    "Summon Draconic Spirit",
-    "Draconic Transformation",
-    "Antagonize"
-}
 
 
 def parse_spell_file(soup: BeautifulSoup) -> dict:
