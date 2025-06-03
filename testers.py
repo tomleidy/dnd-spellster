@@ -42,15 +42,15 @@ def count_datapoints(spells) -> None:
     classes_keys = classes_dict_base.keys()
     for spell in spells:
 
-        if spell["title"]:
+        if test_for_keys_in_dict(["title"], spell, "... good luck!"):
             counts["titles"] += 1
-        if spell["source"]:
+        if test_for_keys_in_dict(["source"], spell, "sources"):
             counts["sources"] += 1
-        if spell["level"] is not None:
+        if test_for_keys_in_dict(["level"], spell, "levels, etc."):
             counts["levels"] += 1
-        if spell["school"]:
+        if test_for_keys_in_dict(["school"], spell, "schools"):
             counts["schools"] += 1
-        if spell["subschool"] is not None:
+        if test_for_keys_in_dict(["subschool"], spell, "subschools"):
             counts["subschools"] += 1
 
         if test_for_keys_in_dict(["duration","concentration"], spell, "durations"):
