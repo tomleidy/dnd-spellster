@@ -2,7 +2,8 @@
 
 import re
 from typing import Tuple
-from patterns import regex_dict, schools_dict, regex_range_dict
+from patterns import regex_dict, schools_dict, regex_range_dict, classes_list
+from helpers import get_class_column_name
 
 casting_time_dict_base_list = ['casting_time_noncombat', 'casting_time_noncombat_unit',
                                'casting_time_combat', 'casting_time_combat_unit',
@@ -11,6 +12,10 @@ casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
 
 range_dict_base = {"range_distance": None, "range_units": None,
                    "range_focus": None, "range_string": None}
+
+classes_dict_base_list = [list(get_class_column_name(key).keys())[0] for key in classes_list]
+classes_dict_base = {key: False for key in classes_dict_base_list}
+print(classes_dict_base)
 
 RE_FLAGS = re.IGNORECASE | re.MULTILINE
 
@@ -196,3 +201,16 @@ def get_duration(html: str) -> dict:
         else:
             duration["duration"] = group.lower()
     return duration
+
+
+def get_spell_list(html: str) -> dict:
+    """ Get dictionary of key: bool, where key is class names (some with _optional suffix) """
+    spell_lists = {}
+    classes = re.findall(regex_dict["spell_lists_classes"], html, flags=RE_FLAGS)
+    if not classes:
+        return spell_lists
+    for pc in classes:
+        if not pc:
+            continue
+        spell_lists.update(get_class_column_name(pc))
+    return spell_lists

@@ -6,7 +6,7 @@ Helper functions
 """
 
 import re
-from patterns import regex_dict, RE_FLAGS
+from patterns import regex_dict, RE_FLAGS, classes_dict
 
 SANITIZE_PAIRS = [("–", "-"), (" ", " "), ("’", "'")]
 
@@ -52,3 +52,20 @@ def is_components(line: str) -> bool:
 def is_duration(line: str) -> bool:
     """ Does this line contain a duration? """
     return re.match(regex_dict["duration"], line, flags=RE_FLAGS)
+
+
+def is_spell_list(line: str) -> bool:
+    """ Does this line contain spell lists this spell shows up in? """
+    return re.match(regex_dict["spell_lists"], line, flags=RE_FLAGS)
+
+
+def get_class_column_name(pc_class: str) -> dict:
+    """ Helper to get class names for database columns """
+    new_class_dict = {}
+    lookup_class = pc_class.replace(" (Optional)", "")
+    if lookup_class in classes_dict:
+        class_name = classes_dict[lookup_class]
+        if pc_class.endswith("(Optional)"):
+            class_name += "_optional"
+        new_class_dict[class_name] = True
+    return new_class_dict

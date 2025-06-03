@@ -7,12 +7,13 @@ from typing import List
 from bs4 import BeautifulSoup
 from helpers import santize_string
 from helpers import is_source, is_level_school_etc, is_casting_time, does_line_need_splitting
-from helpers import is_range, is_components, is_duration
+from helpers import is_range, is_components, is_duration, is_spell_list
 
 from parsers import RE_FLAGS
-from parsers import casting_time_dict_base, range_dict_base, components_dict_base
 from parsers import get_title, get_source, get_level_and_school_etc, get_casting_time, get_range
-from parsers import get_components, get_duration
+from parsers import get_components, get_duration, get_spell_list
+
+from testers import count_datapoints
 
 # generate database
 # create dictionaries of data from each
@@ -67,43 +68,6 @@ def strip_tags(html) -> str:
     return html.strip()
 
 
-def count_datapoints(spells) -> None:
-    """ Print out count of each type of data """
-    keys = ["titles", "sources", "levels", "schools", "subschools", "casting_times",
-            "ranges", "components", "durations", "lists", "descriptions"]
-    counts = {key: 0 for key in keys}
-    casting_time_keys = casting_time_dict_base.keys()
-    range_keys = range_dict_base.keys()
-    component_keys = components_dict_base.keys()
-    for spell in spells:
-
-        if spell["title"]:
-            counts["titles"] += 1
-        if spell["source"]:
-            counts["sources"] += 1
-        if spell["level"] is not None:
-            counts["levels"] += 1
-        if spell["school"]:
-            counts["schools"] += 1
-        if spell["subschool"] is not None:
-            counts["subschools"] += 1
-
-        for _, key in enumerate(casting_time_keys):
-            if key in spell and spell[key] is not None:
-                counts["casting_times"] += 1
-                break
-        for key in range_keys:
-            if key in spell:
-                counts["ranges"] += 1
-                break
-        for key in component_keys:
-            if key in spell and spell[key] is not None and spell[key] is not False:
-                counts["components"] += 1
-                break
-
-    print(counts)
-
-
 DEBUG_THIS_SPELL = False
 broken_set = {}
 unbroken_set = {
@@ -122,7 +86,7 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
         return {}
 
     # let's trust beautifulsoup to remove these tags cleanly instead of regex.
-    for tag in ['em', 'strong', 'a', 'br', 'ul', 'li', 'ol']:
+    for tag in ['em', 'strong', 'a', 'br']:
         for element in soup.select(tag):
             element.unwrap()
     page_content = soup.find_all('p')
@@ -162,6 +126,10 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                     print(f"=== Updated duration for {spell_dict["title"]}: {duration}")
                 else:
                     print(f"--- Line needs parsing? {line}")
+        elif is_spell_list(str_line):
+            spell_list = get_spell_list(str_line)
+            spell_dict.update(spell_list)
+            print(f"=== Updated spell list for {spell_dict["title"]}: {spell_list}")
         else:
             print(f"\n-x- broken with line: {str_line}")
     return spell_dict

@@ -1,0 +1,19 @@
+Artificer
+Bard
+Bard (Optional)
+Cleric
+Cleric (Optional)
+Druid
+Druid (Optional)
+Paladin
+Paladin (Optional)
+Ranger
+Ranger (Optional)
+Sorcerer
+Sorcerer (Optional)
+Warlock
+Warlock (Optional)
+Wizard
+Wizard (Dunamancy)
+Wizard (Graviturgy)
+Wizard (Optional)
