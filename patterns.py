@@ -18,7 +18,7 @@ classes_dict = {
 classes_list = [pc + " (Optional)" for pc in classes_dict if "(" not in pc] + \
     [pc for pc in classes_dict]
 classes_list.sort()
-REGEX_CLASSES = "|".join(classes_list).replace("(", "\(").replace(")", "\)")
+REGEX_CLASSES = "|".join(classes_list).replace("(", "\(").replace(")", "\)") #pylint: disable=W1401
 REGEX_SCHOOLS = "|".join(schools_dict.keys())
 
 REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
