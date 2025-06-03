@@ -147,7 +147,8 @@ def get_range(html: str) -> dict:
         distance = int(shaped.group(1).replace(",", ""))
         unit = shaped.group(3)
         shape = f"{distance}-{shaped.group(3)} {shaped.group(4)}"
-        focus = "Self"
+        if html.startswith("Self"):
+            focus = "Self"
         range_dict.update({})
     elif vectored:
         distance = int(vectored.group(1).replace(",", ""))

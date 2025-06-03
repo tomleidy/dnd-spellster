@@ -25,7 +25,7 @@ REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
 REGEX_ORDINAL = r"(?:st|nd|rd|th)"
 
 regex_range_dict = {
-    "focus_and_shape": r"Self \((\d+)-(([\w]+)[ -]?([\w ]+)\))",
+    "focus_and_shape": r"(?:Self \()?(\d+)-(([\w]+)[ -]?([\w ]+)\)?)",
     "descriptive": r"^(Sight|Special|Touch|Unlimited|Self)$",
     "distance_and_units": r"([\d,]+)[- ]?(feet|ft|miles?)"
 }
