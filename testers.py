@@ -3,9 +3,9 @@
 import os
 import sys
 from parsers import get_casting_time, get_components, get_duration  # pylint: disable=W0611
-from parsers import get_spell_list, get_class_column_name, get_range
-from patterns import classes_list
+from parsers import get_spell_list, get_class_column_name, get_range # pylint: disable=W0611
 from parsers import casting_time_dict_base, range_dict_base, components_dict_base, classes_dict_base
+from patterns import classes_list
 
 classes_list = [get_class_column_name(pc) for pc in classes_list]
 
@@ -67,9 +67,10 @@ def count_datapoints(spells) -> None:
     print(counts, file=sys.stderr)
 
 def test_levels_in_dict(spell: dict):
-        if "level" in spell and spell["level"] >=0:
-            return True
-        return False
+    """ Determine if level is represented in dictionary """
+    if "level" in spell and spell["level"] >=0:
+        return True
+    return False
 
 def test_for_keys_in_dict(keys: list, spell: dict, group: str = "",ignore_absence: bool=False):
     """ Determine if any key in list is in dictionary and True"""
