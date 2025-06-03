@@ -206,7 +206,7 @@ def get_duration(html: str) -> dict:
 
 def get_spell_list(html: str) -> dict:
     """ Get dictionary of key: bool, where key is class names (some with _optional suffix) """
-    spell_lists = {}
+    spell_lists = dict(classes_dict_base)
     classes = re.findall(regex_dict["spell_lists_classes"], html, flags=RE_FLAGS)
     if not classes:
         return spell_lists
