@@ -53,28 +53,27 @@ def count_datapoints(spells) -> None:
         if spell["subschool"] is not None:
             counts["subschools"] += 1
 
-        for _, key in enumerate(casting_time_keys):
-            if key in spell and spell[key] is not None:
-                counts["casting_times"] += 1
-                break
-        for key in range_keys:
-            if key in spell:
-                counts["ranges"] += 1
-                break
-        for key in component_keys:
-            if key in spell and spell[key] is not None and spell[key] is not False:
-                counts["components"] += 1
-                break
-        for key in classes_keys:
-            if key in spell and spell[key] is True:
-                counts["spell_lists"] += 1
-                break
+        if test_for_keys_in_dict(casting_time_keys, spell, "casting time"):
+            counts["casting_times"] += 1
+        if test_for_keys_in_dict(range_keys, spell, "ranges"):
+            counts["ranges"] += 1
+        if test_for_keys_in_dict(component_keys, spell, "components"):
+            counts["components"] += 1
+        if test_for_keys_in_dict(classes_keys, spell, "spell_lists"):
+            counts["spell_lists"] += 1
 
     print(counts)
 
+def test_for_keys_in_dict(keys: list, spell: dict, group: str = ""):
+    """ Determine if any key in list is in dictionary and True"""
+    for key in keys:
+        if key in spell and spell[key]:
+            return True
+    print(f"{spell['title']} missing in {group}")
+    return False
 
 if __name__ == "__main__":
     # run_parser_on_txt_file(get_casting_time, "casting_times.txt")
-    # run_parser_on_txt_file(get_components, "components.txt")
+    run_parser_on_txt_file(get_components, "components.txt")
     # run_parser_on_txt_file(get_duration, "durations.txt")
-    run_parser_on_txt_file(get_spell_list, "spell_lists.txt")
+    #run_parser_on_txt_file(get_spell_list, "spell_lists.txt")
