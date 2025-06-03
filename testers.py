@@ -53,6 +53,8 @@ def count_datapoints(spells) -> None:
         if spell["subschool"] is not None:
             counts["subschools"] += 1
 
+        if test_for_keys_in_dict(["duration","concentration"], spell, "durations"):
+            counts["durations"] += 1
         if test_for_keys_in_dict(casting_time_keys, spell, "casting time"):
             counts["casting_times"] += 1
         if test_for_keys_in_dict(range_keys, spell, "ranges"):
@@ -62,7 +64,7 @@ def count_datapoints(spells) -> None:
         if test_for_keys_in_dict(classes_keys, spell, "spell_lists"):
             counts["spell_lists"] += 1
 
-    print(counts)
+    print(counts, file=sys.stderr)
 
 def test_for_keys_in_dict(keys: list, spell: dict, group: str = ""):
     """ Determine if any key in list is in dictionary and True"""
