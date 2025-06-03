@@ -96,42 +96,44 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
 
     for x in page_content:
         str_line = strip_tags(str(x))
-        if is_source(str_line):
-            source = get_source(str_line)
-            spell_dict.update(source)
-            print(f"=== Updated source for {spell_dict["title"]}: {source}")
-        elif is_level_school_etc(str_line):
-            level_etc = get_level_and_school_etc(str_line)
-            spell_dict.update(level_etc)
-            print(f"=== Updated level, school, etc., for {spell_dict["title"]}: {level_etc}")
-        elif does_line_need_splitting(str_line):
+        lines = []
+        if does_line_need_splitting(str_line):
             print(f"=~= Line needs splitting: {str_line.split("\n")}")
-            for line in str_line.split("\n"):
-                line = santize_string(line)
-                if is_casting_time(line):
-                    casting_time = get_casting_time(line)
-                    spell_dict.update(casting_time)
-                    print(f"=== Updated casting time for {spell_dict["title"]}: {casting_time}")
-                elif is_range(line):
-                    range_info = get_range(line)
-                    spell_dict.update(range_info)
-                    print(f"=== Updated range for {spell_dict["title"]}: {range_info}")
-                elif is_components(line):
-                    components = get_components(line)
-                    spell_dict.update(components)
-                    print(f"=== Updated components for {spell_dict["title"]}: {components}")
-                elif is_duration(line):
-                    duration = get_duration(line)
-                    spell_dict.update(duration)
-                    print(f"=== Updated duration for {spell_dict["title"]}: {duration}")
-                else:
-                    print(f"--- Line needs parsing? {line}")
-        elif is_spell_list(str_line):
-            spell_list = get_spell_list(str_line)
-            spell_dict.update(spell_list)
-            print(f"=== Updated spell list for {spell_dict["title"]}: {spell_list}")
+            lines = str_line.split("\n")
         else:
-            print(f"\n-x- broken with line: {str_line}")
+            lines = [str_line]
+        for line in lines:
+            line = santize_string(line)
+            if is_source(line):
+                source = get_source(line)
+                spell_dict.update(source)
+                print(f"=== Updated source for {spell_dict["title"]}: {source}")
+            elif is_level_school_etc(line):
+                level_etc = get_level_and_school_etc(line)
+                spell_dict.update(level_etc)
+                print(f"=== Updated level, school, etc., for {spell_dict["title"]}: {level_etc}")
+            elif is_casting_time(line):
+                casting_time = get_casting_time(line)
+                spell_dict.update(casting_time)
+                print(f"=== Updated casting time for {spell_dict["title"]}: {casting_time}")
+            elif is_range(line):
+                range_info = get_range(line)
+                spell_dict.update(range_info)
+                print(f"=== Updated range for {spell_dict["title"]}: {range_info}")
+            elif is_components(line):
+                components = get_components(line)
+                spell_dict.update(components)
+                print(f"=== Updated components for {spell_dict["title"]}: {components}")
+            elif is_duration(line):
+                duration = get_duration(line)
+                spell_dict.update(duration)
+                print(f"=== Updated duration for {spell_dict["title"]}: {duration}")
+            elif is_spell_list(line):
+                spell_list = get_spell_list(line)
+                spell_dict.update(spell_list)
+                print(f"=== Updated spell list for {spell_dict["title"]}: {spell_list}")
+            else:
+                print(f"\n--- Line needs parsing? {line}")
     return spell_dict
 
 
