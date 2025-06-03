@@ -1,0 +1,38 @@
+Range: 1,000 feet
+Range: 100 feet
+Range: 10 feet
+Range: 120 feet
+Range: 150 feet
+Range: 15-foot cone
+Range: 1 mile
+Range: 20 feet
+Range: 300 feet
+Range: 30 feet
+Range: 500 feet
+Range: 500 miles
+Range: 5 feet
+Range: 60 feet
+Range: 60 ft
+Range: 60ft
+Range: 90 feet
+Range: 90 ft
+Range: Self
+Range: Self (100-foot line)
+Range: Self (10-foot radius)
+Range: Self (10-foot-radius hemisphere)
+Range: Self (10-foot-radius sphere)
+Range: Self (15-foot cone)
+Range: Self (15-foot cube)
+Range: Self (15-foot radius)
+Range: Self (15-foot-radius)
+Range: Self (30-foot cone)
+Range: Self (30-foot line)
+Range: Self (30-foot radius)
+Range: Self (5-foot radius)
+Range: Self (5-mile radius)
+Range: Self (60-foot cone)
+Range: Self (60-foot line)
+Range: Sight
+Range: Special
+Range: Touch
+Range: Unlimited

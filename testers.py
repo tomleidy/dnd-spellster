@@ -3,7 +3,7 @@
 import os
 import sys
 from parsers import get_casting_time, get_components, get_duration  # pylint: disable=W0611
-from parsers import get_spell_list, get_class_column_name
+from parsers import get_spell_list, get_class_column_name, get_range
 from patterns import classes_list
 from parsers import casting_time_dict_base, range_dict_base, components_dict_base, classes_dict_base
 
@@ -74,6 +74,7 @@ def test_for_keys_in_dict(keys: list, spell: dict, group: str = ""):
 
 if __name__ == "__main__":
     # run_parser_on_txt_file(get_casting_time, "casting_times.txt")
-    run_parser_on_txt_file(get_components, "components.txt")
+    #run_parser_on_txt_file(get_components, "components.txt")
     # run_parser_on_txt_file(get_duration, "durations.txt")
     #run_parser_on_txt_file(get_spell_list, "spell_lists.txt")
+    run_parser_on_txt_file(get_range, "ranges.txt")
