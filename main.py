@@ -160,7 +160,10 @@ def parse_spell_file(soup: BeautifulSoup) -> dict:
                 spell_list = get_at_higher_levels(line)
                 spell_dict.update(spell_list)
             else:
-                print(f"\n--- Line needs parsing? {line}")
+                if "description" in spell_dict:
+                    spell_dict["description"] += f" {line}"
+                else:
+                    spell_dict["description"] = line
     return spell_dict
 
 

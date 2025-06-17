@@ -57,7 +57,7 @@ def count_datapoints(spells) -> None:
         "components",
         "durations",
         "spell_lists",
-        "descriptions",
+        "description",
         "at_higher_levels",
     ]
     counts = {key: 0 for key in keys}
@@ -90,6 +90,8 @@ def count_datapoints(spells) -> None:
             counts["spell_lists"] += 1
         if test_for_keys_in_dict(["at_higher_levels"], spell, "at_higher_levels", True):
             counts["at_higher_levels"] += 1
+        if test_for_keys_in_dict(["description"], spell, "description"):
+            counts["description"] += 1
 
     print(counts, file=sys.stderr)
 
