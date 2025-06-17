@@ -1,17 +1,30 @@
-""" Functions to help examine what the parser functions do on files containing all unique examples of various field data """
+"""Functions to help examine what the parser functions do on files containing all unique examples of various field data"""
 
 import os
 import sys
-from parsers import get_casting_time, get_components, get_duration  # pylint: disable=W0611
-from parsers import get_spell_list, get_class_column_name, get_range # pylint: disable=W0611
-from parsers import casting_time_dict_base, range_dict_base, components_dict_base, classes_dict_base
+from parsers import (
+    get_casting_time,
+    get_components,
+    get_duration,
+)  # pylint: disable=W0611
+from parsers import (
+    get_spell_list,
+    get_class_column_name,
+    get_range,
+)  # pylint: disable=W0611
+from parsers import (
+    casting_time_dict_base,
+    range_dict_base,
+    components_dict_base,
+    classes_dict_base,
+)
 from patterns import classes_list
 
 classes_list = [get_class_column_name(pc) for pc in classes_list]
 
 
 def load_temp_file(filename):
-    """ Load text file of sorted and unique examples of text to parse """
+    """Load text file of sorted and unique examples of text to parse"""
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as file:
             return file.readlines()
@@ -19,7 +32,7 @@ def load_temp_file(filename):
 
 
 def run_parser_on_txt_file(parser_func, filename: str) -> None:
-    """ Iterate over results from specific file using function"""
+    """Iterate over results from specific file using function"""
     lines = load_temp_file(filename)
     print(f"Test parsing on {len(lines)} lines from {filename}", file=sys.stderr)
     count = 0
@@ -32,9 +45,21 @@ def run_parser_on_txt_file(parser_func, filename: str) -> None:
 
 
 def count_datapoints(spells) -> None:
-    """ Print out count of each type of data """
-    keys = ["titles", "sources", "levels", "schools", "subschools", "casting_times",
-            "ranges", "components", "durations", "spell_lists", "descriptions"]
+    """Print out count of each type of data"""
+    keys = [
+        "titles",
+        "sources",
+        "levels",
+        "schools",
+        "subschools",
+        "casting_times",
+        "ranges",
+        "components",
+        "durations",
+        "spell_lists",
+        "descriptions",
+        "at_higher_levels",
+    ]
     counts = {key: 0 for key in keys}
     casting_time_keys = casting_time_dict_base.keys()
     range_keys = range_dict_base.keys()
@@ -50,10 +75,10 @@ def count_datapoints(spells) -> None:
             counts["levels"] += 1
         if test_for_keys_in_dict(["school"], spell, "schools"):
             counts["schools"] += 1
-        if test_for_keys_in_dict(["subschool"], spell, "subschools",True):
+        if test_for_keys_in_dict(["subschool"], spell, "subschools", True):
             counts["subschools"] += 1
 
-        if test_for_keys_in_dict(["duration","concentration"], spell, "durations"):
+        if test_for_keys_in_dict(["duration", "concentration"], spell, "durations"):
             counts["durations"] += 1
         if test_for_keys_in_dict(casting_time_keys, spell, "casting time"):
             counts["casting_times"] += 1
@@ -63,17 +88,23 @@ def count_datapoints(spells) -> None:
             counts["components"] += 1
         if test_for_keys_in_dict(classes_keys, spell, "spell_lists"):
             counts["spell_lists"] += 1
+        if test_for_keys_in_dict(["at_higher_levels"], spell, "at_higher_levels", True):
+            counts["at_higher_levels"] += 1
 
     print(counts, file=sys.stderr)
 
+
 def test_levels_in_dict(spell: dict):
-    """ Determine if level is represented in dictionary """
-    if "level" in spell and spell["level"] >=0:
+    """Determine if level is represented in dictionary"""
+    if "level" in spell and spell["level"] >= 0:
         return True
     return False
 
-def test_for_keys_in_dict(keys: list, spell: dict, group: str = "",ignore_absence: bool=False):
-    """ Determine if any key in list is in dictionary and True"""
+
+def test_for_keys_in_dict(
+    keys: list, spell: dict, group: str = "", ignore_absence: bool = False
+):
+    """Determine if any key in list is in dictionary and True"""
     for key in keys:
         if key in spell and spell[key]:
             return True
@@ -81,9 +112,10 @@ def test_for_keys_in_dict(keys: list, spell: dict, group: str = "",ignore_absenc
         print(f"{spell['title']} missing in {group}")
     return False
 
+
 if __name__ == "__main__":
     # run_parser_on_txt_file(get_casting_time, "casting_times.txt")
-    #run_parser_on_txt_file(get_components, "components.txt")
+    # run_parser_on_txt_file(get_components, "components.txt")
     # run_parser_on_txt_file(get_duration, "durations.txt")
-    #run_parser_on_txt_file(get_spell_list, "spell_lists.txt")
+    # run_parser_on_txt_file(get_spell_list, "spell_lists.txt")
     run_parser_on_txt_file(get_range, "ranges.txt")

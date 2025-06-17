@@ -1,24 +1,41 @@
-""" The engine for this madness. The regular expressions and related constants. """
+"""The engine for this madness. The regular expressions and related constants."""
+
 import re
 
 # yes, it would be easier to just use lower and replace these, but these I need to be precise
 schools_dict = {
-    "abjuration": "Abjuration", "conjuration": "Conjuration", "divination": "Divination",
-    "enchantment": "Enchantment", "evocation": "Evocation", "illusion": "Illusion",
-    "necromancy": "Necromancy", "transmutation": "Transmutation", "dunamancy": "Dunamancy",
-    "dunamancy:chronurgy": "Chronurgy Dunamancy:", "dunamancy:graviturgy": "Graviturgy Dunamancy",
-    "ritual": "Ritual", "technomagic": "Technomagic"
+    "abjuration": "Abjuration",
+    "conjuration": "Conjuration",
+    "divination": "Divination",
+    "enchantment": "Enchantment",
+    "evocation": "Evocation",
+    "illusion": "Illusion",
+    "necromancy": "Necromancy",
+    "transmutation": "Transmutation",
+    "dunamancy": "Dunamancy",
+    "dunamancy:chronurgy": "Chronurgy Dunamancy:",
+    "dunamancy:graviturgy": "Graviturgy Dunamancy",
+    "ritual": "Ritual",
+    "technomagic": "Technomagic",
 }
 classes_dict = {
-    "Artificer": "artificer", "Bard": "bard", "Cleric": "cleric",
-    "Druid": "druid", "Paladin": "paladin", "Ranger": "ranger",
-    "Sorcerer": "sorcerer", "Warlock": "warlock", "Wizard": "wizard",
-    "Wizard (Dunamancy)": "wizard", "Wizard (Graviturgy)": "wizard",
+    "Artificer": "artificer",
+    "Bard": "bard",
+    "Cleric": "cleric",
+    "Druid": "druid",
+    "Paladin": "paladin",
+    "Ranger": "ranger",
+    "Sorcerer": "sorcerer",
+    "Warlock": "warlock",
+    "Wizard": "wizard",
+    "Wizard (Dunamancy)": "wizard",
+    "Wizard (Graviturgy)": "wizard",
 }
-classes_list = [pc + " (Optional)" for pc in classes_dict if "(" not in pc] + \
-    [pc for pc in classes_dict]
+classes_list = [pc + " (Optional)" for pc in classes_dict if "(" not in pc] + [
+    pc for pc in classes_dict
+]
 classes_list.sort()
-REGEX_CLASSES = "|".join(classes_list).replace("(", "\(").replace(")", "\)") #pylint: disable=W1401
+REGEX_CLASSES = "|".join(classes_list).replace("(", "\\(").replace(")", "\\)")
 REGEX_SCHOOLS = "|".join(schools_dict.keys())
 
 REGEX_EXTRA = r"(?: \(([\w:]+)\))?"
@@ -27,7 +44,7 @@ REGEX_ORDINAL = r"(?:st|nd|rd|th)"
 regex_range_dict = {
     "focus_and_shape": r"(?:Self \()?(\d+)-(([\w]+)[ -]?([\w ]+)\)?)",
     "descriptive": r"^(Sight|Special|Touch|Unlimited|Self)$",
-    "distance_and_units": r"([\d,]+)[- ]?(feet|ft|miles?)"
+    "distance_and_units": r"([\d,]+)[- ]?(feet|ft|miles?)",
 }
 
 regex_dict = {
@@ -46,7 +63,7 @@ regex_dict = {
     "spell_lists": r"^Spell Lists",
     "spell_lists_classes": rf"({REGEX_CLASSES})",
     # might be multiple descriptions, test iterations (make sure they don't match spell list first)
-    "descriptions": r"<p>([\w\W]+)</p>"
-
+    "at_higher_levels": r"^At Higher Levels[:\.]?\s?([\w\S]+)",
+    "descriptions": r"([\w\W]+)",
 }
 RE_FLAGS = re.IGNORECASE

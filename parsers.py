@@ -1,19 +1,29 @@
-""" Functions to handle the string parsing """
+"""Functions to handle the string parsing"""
 
 import re
 from typing import Tuple
 from patterns import regex_dict, schools_dict, regex_range_dict, classes_list
 from helpers import get_class_column_name
 
-casting_time_dict_base_list = ['casting_time_noncombat', 'casting_time_noncombat_unit',
-                               'casting_time_combat', 'casting_time_combat_unit',
-                               'casting_time_reaction_condition']
+casting_time_dict_base_list = [
+    "casting_time_noncombat",
+    "casting_time_noncombat_unit",
+    "casting_time_combat",
+    "casting_time_combat_unit",
+    "casting_time_reaction_condition",
+]
 casting_time_dict_base = {key: None for key in casting_time_dict_base_list}
 
-range_dict_base = {"range_distance": None, "range_units": None,
-                   "range_focus": None, "range_string": None}
+range_dict_base = {
+    "range_distance": None,
+    "range_units": None,
+    "range_focus": None,
+    "range_string": None,
+}
 
-classes_dict_base_list = [list(get_class_column_name(key).keys())[0] for key in classes_list]
+classes_dict_base_list = [
+    list(get_class_column_name(key).keys())[0] for key in classes_list
+]
 classes_dict_base = {key: False for key in classes_dict_base_list}
 print(classes_dict_base)
 
@@ -21,7 +31,7 @@ RE_FLAGS = re.IGNORECASE | re.MULTILINE
 
 
 def get_title(soup) -> str:
-    """ Take soup, get title """
+    """Take soup, get title"""
     regex_title = r"^(.+) - DND 5th Edition"
     title = soup.find("title").get_text()
     title = re.search(regex_title, title)
@@ -31,7 +41,7 @@ def get_title(soup) -> str:
 
 
 def get_source(html) -> str:
-    """ Parse and return source from HTML """
+    """Parse and return source from HTML"""
     result = re.search(regex_dict["source"], html)
     if result:
         result = result.group(1)
@@ -40,7 +50,7 @@ def get_source(html) -> str:
 
 
 def get_level_and_school_etc(html: str) -> Tuple[str]:
-    """ Parse and return school and level from html """
+    """Parse and return school and level from html"""
     html = html.lower()
     result_list = []
     result = re.search(regex_dict["level_school"], html, flags=re.IGNORECASE)
@@ -57,12 +67,12 @@ def get_level_and_school_etc(html: str) -> Tuple[str]:
 
 
 def normalize_level_school_result(level_school_result: list) -> list:
-    """ Re-organize result to be level (int), school (string), extra1, extra2"""
+    """Re-organize result to be level (int), school (string), extra1, extra2"""
     if not level_school_result:
         return None
     level = -1
     school = ""
-    if level_school_result[1] == 'cantrip':
+    if level_school_result[1] == "cantrip":
         level = 0
         school = level_school_result[0]
     elif level_school_result[1] in schools_dict:
@@ -85,7 +95,7 @@ def normalize_level_school_result(level_school_result: list) -> list:
 
 
 def get_casting_time(html) -> str:
-    """ Return casting time from HTML """
+    """Return casting time from HTML"""
     result = re.findall(regex_dict["casting_times_only"], html, RE_FLAGS)
     if not result:
         return None
@@ -105,30 +115,35 @@ def get_casting_time(html) -> str:
             if casting_time_dict["casting_time_noncombat"] is not None:
                 raise RuntimeError("Data has two non-combat casting times")
             casting_time_dict.update(get_noncombat_dict(non_combat))
-    condition = re.findall(regex_dict["casting_time_reaction_conditions"], html, RE_FLAGS)
+    condition = re.findall(
+        regex_dict["casting_time_reaction_conditions"], html, RE_FLAGS
+    )
     if condition:
         casting_time_dict.update({"casting_time_reaction_condition": condition[0]})
     return casting_time_dict
+
 
 # TODO: merge the next two functions
 
 
 def get_noncombat_dict(non_combat):
-    """ Return regex data in dictionary form """
-    return {"casting_time_noncombat": int(non_combat.group(1)),
-            "casting_time_noncombat_unit": non_combat.group(2).lower()
-            }
+    """Return regex data in dictionary form"""
+    return {
+        "casting_time_noncombat": int(non_combat.group(1)),
+        "casting_time_noncombat_unit": non_combat.group(2).lower(),
+    }
 
 
 def get_combat_dict(combat):
-    """ Return regex data in dictionary form """
-    return {"casting_time_combat": int(combat.group(1)),
-            "casting_time_combat_unit": combat.group(2).lower()
-            }
+    """Return regex data in dictionary form"""
+    return {
+        "casting_time_combat": int(combat.group(1)),
+        "casting_time_combat_unit": combat.group(2).lower(),
+    }
 
 
 def get_range(html: str) -> dict:
-    """ Get range from provided string """
+    """Get range from provided string"""
     section = re.search(regex_dict["range"], html, flags=RE_FLAGS)
     if not section:
         return None
@@ -155,9 +170,14 @@ def get_range(html: str) -> dict:
         unit = vectored.group(2)
     if unit in {"foot", "ft"}:
         unit = "feet"
-    range_dict.update({"range_distance": distance, "range_units": unit,
-                       "range_focus": focus, "range_string": shape
-                       })
+    range_dict.update(
+        {
+            "range_distance": distance,
+            "range_units": unit,
+            "range_focus": focus,
+            "range_string": shape,
+        }
+    )
     return range_dict
 
 
@@ -165,12 +185,12 @@ components_dict_base = {
     "components_verbal": False,
     "components_somatic": False,
     "components_material": False,
-    "components_material_details": None
+    "components_material_details": None,
 }
 
 
 def get_components(html: str) -> dict:
-    """ Get components from string """
+    """Get components from string"""
     components = dict(components_dict_base)
     result = re.search(regex_dict["components"], html, flags=RE_FLAGS)
     for group in result.groups():
@@ -190,7 +210,7 @@ def get_components(html: str) -> dict:
 
 
 def get_duration(html: str) -> dict:
-    """ Get durations from string """
+    """Get durations from string"""
     duration = {"concentration": False, "duration": None}
     result = re.search(regex_dict["duration"], html, flags=RE_FLAGS)
     # print(result.groups())
@@ -205,7 +225,7 @@ def get_duration(html: str) -> dict:
 
 
 def get_spell_list(html: str) -> dict:
-    """ Get dictionary of key: bool, where key is class names (some with _optional suffix) """
+    """Get dictionary of key: bool, where key is class names (some with _optional suffix)"""
     spell_lists = dict(classes_dict_base)
     classes = re.findall(regex_dict["spell_lists_classes"], html, flags=RE_FLAGS)
     if not classes:
@@ -215,3 +235,12 @@ def get_spell_list(html: str) -> dict:
             continue
         spell_lists.update(get_class_column_name(pc))
     return spell_lists
+
+
+def get_at_higher_levels(html: str) -> dict:
+    """Get text for at higher levels if extant"""
+    result = re.search(regex_dict["at_higher_levels"], html)
+    if result:
+        result = result.group(1)
+        return {"at_higher_levels": result}
+    return {}
