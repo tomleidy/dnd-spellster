@@ -92,6 +92,12 @@ parser.add_argument(
     default="name",
     help="sort by name, level, school, or range",
 )
+parser.add_argument(
+    "-u",
+    "--unprepared",
+    action="store_true",
+    help="include unprepared spells (default: prepared only)",
+)
 
 args = parser.parse_args()
 
@@ -276,7 +282,14 @@ def is_selected(spell):
     """Do we select this spell for inclusion?"""
     if args.char_class:
         keys = class_keys(args.char_class)
-        if not any(spell.get(k, False) for k in keys):
+        spell_available = any(spell.get(k, False) for k in keys)
+
+        # Also check if it's in the character's extra spells
+        if not spell_available and character:
+            extra_spells = character.get("extra_spells", [])
+            spell_available = spell.get("title") in extra_spells
+
+        if not spell_available:
             return False
     if args.level:
         level = spell.get("level")
@@ -285,6 +298,11 @@ def is_selected(spell):
     if args.range:
         spell_range = get_range_for_sorting(spell)
         if spell_range < args.range:
+            return False
+    # Default to prepared spells only, unless -u flag is used
+    if not args.unprepared and character:
+        prepared_spells = character.get("prepared_spells", [])
+        if spell.get("title") not in prepared_spells:
             return False
     if args.noncombat:
         for nc in ["casting_time_noncombat", "casting_time_noncombat_unit"]:
