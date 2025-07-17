@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Prev",
+    "class": "paladin",
+    "level": 7,
+    "prepared_spells": [
+      "Absorb Elements",
+      "Sanctuary",
+      "Bless",
+      "Command",
+      "Compelled Duel",
+      "Cure Wounds",
+      "Detect Evil and Good",
+      "Divine Favor",
+      "Protection from Evil and Good",
+      "Silence",
+      "Warding Bond"
+    ],
+    "extra_spells": ["Absorb Elements", "Sanctuary", "Silence", "Warding Bond"],
+    "max_hp": 68,
+    "cur_hp": 68,
+    "charisma": 18
+  }
+]
